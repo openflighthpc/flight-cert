@@ -30,7 +30,7 @@
 # Application Name
 # The name of the application to use in the help text
 # ==============================================================================
-config :app_name, default: 'flight-asset'
+config :app_name, default: ENV.fetch('FLIGHT_PROGRAM_NAME', 'bin/cert')
 
 # ==============================================================================
 # Log Path

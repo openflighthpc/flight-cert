@@ -33,10 +33,8 @@ module FlightCert
   module CLI
     extend Commander::CLI
 
-    PROGRAM_NAME = ENV.fetch('FLIGHT_PROGRAM_NAME','flight_cert')
-
     program :application, "Flight WWW"
-    program :name, PROGRAM_NAME
+    program :name, Config::CACHE.app_name
     program :version, "v#{FlightCert::VERSION}"
     program :description, '%DESCRIPTION%'
     program :help_paging, false
