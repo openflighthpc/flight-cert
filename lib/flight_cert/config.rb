@@ -30,7 +30,7 @@ require 'logger'
 require 'hashie'
 
 module FlightCert
-  module Config
+  class Config < Hashie::Trash
     include Hashie::Extensions::IgnoreUndeclared
     include Hashie::Extensions::Dash::IndifferentAccess
 
@@ -61,80 +61,80 @@ module FlightCert
       # Define the truthiness method
       # NOTE: Empty values are not considered truthy
       define_method(:"#{sym}?") do
-        value = sedn(sym)
+        value = send(sym)
         if value.respond_to?(:empty?)
           value.empty?
         else
           send(sym) ? true : false
         end
       end
+    end
 
-      config :development
+    config :development
 
-      def log_path_or_stderr
-        if log_level == 'disabled'
-          '/dev/null'
-        elsif log_path
-          FileUtils.mkdir_p File.dirname(log_path)
-          log_path
+    def log_path_or_stderr
+      if log_level == 'disabled'
+        '/dev/null'
+      elsif log_path
+        FileUtils.mkdir_p File.dirname(log_path)
+        log_path
+      else
+        $stderr
+      end
+    end
+
+    def logger
+      @logger ||= Logger.new(log_path_or_stderr).tap do |log|
+        next if log_level == 'disabled'
+
+        # Determine the level
+        level = case log_level
+        when 'fatal'
+          Logger::FATAL
+        when 'error'
+          Logger::ERROR
+        when 'warn'
+          Logger::WARN
+        when 'info'
+          Logger::INFO
+        when 'debug'
+          Logger::DEBUG
+        end
+
+        if level.nil?
+          # Log bad log levels
+          log.level = Logger::ERROR
+          log.error "Unrecognized log level: #{log_level}"
         else
-          $stderr
+          # Sets good log levels
+          log.level = level
         end
       end
+    end
 
-      def logger
-        @logger ||= Logger.new(log_path_or_stderr).tap do |log|
-          next if log_level == 'disabled'
+    def lets_encrypt?
+      resolved_cert_type == :lets_encrypt
+    end
 
-          # Determine the level
-          level = case log_level
-          when 'fatal'
-            Logger::FATAL
-          when 'error'
-            Logger::ERROR
-          when 'warn'
-            Logger::WARN
-          when 'info'
-            Logger::INFO
-          when 'debug'
-            Logger::DEBUG
-          end
+    def self_signed?
+      resolved_cert_type == :self_signed
+    end
 
-          if level.nil?
-            # Log bad log levels
-            log.level = Logger::ERROR
-            log.error "Unrecognized log level: #{log_level}"
-          else
-            # Sets good log levels
-            log.level = level
-          end
-        end
-      end
-
-      def lets_encrypt?
-        resolved_cert_type == :lets_encrypt
-      end
-
-      def self_signed?
-        resolved_cert_type == :self_signed
-      end
-
-      # NOTE: This method must not be cached! The config is a dynamic object that
-      # is updated by scripts. This method must reflect these changes
-      def resolved_cert_type
-        case cert_type.to_s
-        when *LETS_ENCRYPT_TYPES
-          :lets_encrypt
-        when *SELF_SIGNED_TYPES
-          :self_signed
-        else
-          $stderr.puts <<~WARN.chomp
-            An unexpected error has occurred! The previously cached certificate type is unrecognized: #{cert_type}
-            Attempting to fallback onto self-signed, your mileage may vary
-          WARN
-          self.cert_type = 'self-signed'
-          :self_signed
-        end
+    # NOTE: This method must not be cached! The config is a dynamic object that
+    # is updated by scripts. This method must reflect these changes
+    def resolved_cert_type
+      case cert_type.to_s
+      when *LETS_ENCRYPT_TYPES
+        :lets_encrypt
+      when *SELF_SIGNED_TYPES
+        :self_signed
+      else
+        $stderr.puts <<~WARN.chomp
+          An unexpected error has occurred! The previously cached certificate type is unrecognized: #{cert_type}
+          Attempting to fallback onto self-signed, your mileage may vary
+        WARN
+        self.cert_type = 'self-signed'
+        :self_signed
       end
     end
 

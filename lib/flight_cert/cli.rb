@@ -36,7 +36,7 @@ module FlightCert
     program :application, "Flight WWW"
     program :name, Config::CACHE.app_name
     program :version, "v#{FlightCert::VERSION}"
-    program :description, '%DESCRIPTION%'
+    program :description, 'Manage the HTTPs server and SSL certificates'
     program :help_paging, false
     default_command :help
 
