@@ -34,7 +34,7 @@ begin
   Bundler.setup(:default)
 
   # Enables the development mode
-  require 'flight_cert/config'
+  require_relative '../lib/flight_cert/config'
   if FlightCert::Config::CACHE.development?
     begin
         Bundler.setup(:default, :development)
@@ -47,7 +47,7 @@ begin
   end
 
   # Run the CLI
-  require 'flight_cert/cli'
+  require_relative '../lib/flight_cert/cli'
   Dir.chdir(ENV.fetch('FLIGHT_CWD','.'))
   OpenFlight.set_standard_env rescue nil
   FlightCert::CLI.run!
