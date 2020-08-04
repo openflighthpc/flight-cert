@@ -29,3 +29,7 @@ source 'https://rubygems.org'
 
 gem 'commander-openflighthpc', '> 2.0.0'
 gem 'hashie'
+
+group :development do
+  gem 'pry'
+end

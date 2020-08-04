@@ -69,6 +69,8 @@ module FlightCert
         end
       end
 
+      config :development
+
       def log_path_or_stderr
         if log_level == 'disabled'
           '/dev/null'
