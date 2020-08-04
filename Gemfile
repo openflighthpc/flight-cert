@@ -27,6 +27,5 @@
 #==============================================================================
 source 'https://rubygems.org'
 
-gem 'commander-openflighthpc', '~> 1.1.0'
+gem 'commander-openflighthpc', '> 2.0.0'
 gem 'hashie'
-gem 'xdg', git: 'https://github.com/bkuhlmann/xdg'
