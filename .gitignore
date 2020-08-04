@@ -4,3 +4,4 @@ tmp
 vendor
 var
 etc/config.yml
+etc/config.yaml

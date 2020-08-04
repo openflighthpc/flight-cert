@@ -24,14 +24,10 @@
 # For more information on FlightCert, please visit:
 # https://github.com/openflighthpc/flight-cert
 #==============================================================================
-require_relative '../command'
 
-module Flight_www
+module FlightCert
   module Commands
-    class Hello < Command
-      def run
-        puts "Hello, flight_cert"
-      end
+    class CertGen < Command
     end
   end
 end

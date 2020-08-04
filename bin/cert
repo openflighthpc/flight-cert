@@ -50,7 +50,7 @@ begin
   require_relative '../lib/flight_cert/cli'
   Dir.chdir(ENV.fetch('FLIGHT_CWD','.'))
   OpenFlight.set_standard_env rescue nil
-  FlightCert::CLI.run!
+  FlightCert::CLI.run!(*ARGV)
 rescue Interrupt
   if Kernel.const_defined?(:Paint)
     $stderr.puts "\n#{Paint['WARNING', :underline, :yellow]}: Cancelled by user"

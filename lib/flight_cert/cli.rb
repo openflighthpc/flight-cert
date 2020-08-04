@@ -24,8 +24,10 @@
 # For more information on FlightCert, please visit:
 # https://github.com/openflighthpc/flight-cert
 #==============================================================================
+
 require_relative 'commands'
 require_relative 'version'
+require_relative 'config'
 
 require 'commander'
 
@@ -55,6 +57,32 @@ module FlightCert
 
         yield c if block_given?
       end
+    end
+
+    create_command 'cert-gen' do |c|
+      c.summary = 'Generate and renew SSL certificates'
+      c.description = <<~DESC.chomp
+        By default the HTTPS server is disabled as it requires an SSL certificate.
+        The '#{Config::CACHE.app_name}' utilities support the generation of Let's Encrypt and
+        self-signed certificates.  We recommended that a Let's Encrypt certificate
+        is generated where possible.
+
+        In order to generate a Let's Encrypt certificate, you will require a
+        publicly available DNS entry and an email address.  The HTTP server will
+        also need to be running to allow Let's Encrypt to successfully preform a DNS
+        challenge.  Once ready, A Let's Encrypt certificate can be generated with
+        the following command:
+
+        '#{Config::CACHE.app_name} cert-gen --cert-type lets-encrypt --domain DOMAIN --email EMAIL'
+
+        Alternatively, a self-signed SSL certificate valid for 10 years can be
+        generated, buy running the following command:
+        '#{Config::CACHE.app_name} cert-gen --cert-type self-signed'
+      DESC
+      c.slop.string '--cert-type', 'Select the certificate type: lets-encrypt|self-signed'
+      c.slop.string '--domain', 'The domain associated with the certificate'
+      c.slop.string '--email', "The email address associated with the Let's Encrypt certificate. Use empty string to unset"
+      c.slop.bool '--config-only', 'Only update the internal configuration, skips certificate generation'
     end
 
     if Config::CACHE.development?

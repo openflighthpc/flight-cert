@@ -29,6 +29,8 @@ require 'yaml'
 require 'logger'
 require 'hashie'
 
+require_relative 'errors'
+
 module FlightCert
   class Config < Hashie::Trash
     include Hashie::Extensions::IgnoreUndeclared
