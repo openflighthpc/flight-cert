@@ -33,21 +33,6 @@
 config :app_name, default: ENV.fetch('FLIGHT_PROGRAM_NAME', 'bin/cert')
 
 # ==============================================================================
-# Log Path
-# The file the logger will write to. It will write to standard error when set to
-# empty string.
-# ==============================================================================
-config :log_path, required: false,
-                  default: File.expand_path('../var/log/flight-cert.log')
-
-# ==============================================================================
-# Cron Path
-# The file path of the auto-renewal crontab. This file will be created when
-# requested.
-# ==============================================================================
-config :cron_path, default: '/etc/cron.daily/www-cert-gen'
-
-# ==============================================================================
 # Certificate Type
 # Specify whether a "lets_encrypt" or "self_signed" certificate should be used.
 #
@@ -56,6 +41,121 @@ config :cron_path, default: '/etc/cron.daily/www-cert-gen'
 # snake_case, kebab-case, CamalCase, UPPER_SNAKE (+ others)
 # ==============================================================================
 config :cert_type, default: 'lets_encrypt'
+
+# ==============================================================================
+# Email
+# Stores the email address that all newly generated certificates will be
+# associated with
+#
+# The email is required for lets-encrypt certificates but optional for
+# self-signed
+# ==============================================================================
+config :email, required: false
+
+# ==============================================================================
+# Domain
+# Stores the domain all newly generated certificates will be associated with.
+# By default it will be inferred from the hostname
+# ==============================================================================
+config :domain, default: `hostname --fqdn`.chomp
+
+# ==============================================================================
+# SSL Private Key
+# Define the path to the target SSL private key. Any external application
+# which requires the private key, should match this path.
+#
+# It may either be:
+#  * A relative path from the directory containing this file, or
+#  * An absolute path
+# ==============================================================================
+config :ssl_privkey,
+        default: 'ssl/privkey.pem',
+        transform_with: ->(path) { File.expand_path(path, __dir__) }
+
+# ==============================================================================
+# SSL Fullchain Certificate
+# Define the path to the target SSL fullchain certificate. Any external
+# application which requires the certificate, should match this path.
+#
+# It may either be:
+#  * A relative path from the directory containing this file, or
+#  * An absolute path
+# ==============================================================================
+config :ssl_fullchain,
+        default: 'ssl/fullchain.pem',
+        transform_with: ->(path) { File.expand_path(path, __dir__) }
+
+# ==============================================================================
+# Self Signed Directory
+# Define the directory where the self signed fullchain certificate and private
+# key will be stored.
+#
+# It may either be:
+#  * A relative path from the directory containing this file, or
+#  * An absolute path
+# ==============================================================================
+config :selfsigned_dir,
+        default: 'self-signed',
+        transform_with: ->(path) { File.expand_path(path, __dir__) }
+
+# ==============================================================================
+# Lets Encrypt Live Directory
+# Define where LetsEncrypt stores its live certificates.
+#
+# All paths are expanded from the file system root directory
+# ==============================================================================
+config :letsencyrpt_live_dir,
+        default: '/etc/letsencrypt/live',
+        transform_with: ->(path) { File.expand_path(path, '/') }
+
+# ==============================================================================
+# Certbot "Binary"
+# Define the path to the certbot bin file. For internal security reasons, certbot
+# must be executed via an absolute path.
+#
+# All paths are expanded from the file system root directory
+# ==============================================================================
+config :certbot_bin,
+        default: '/usr/local/bin/certbot',
+        transform_with: ->(path) { File.expand_path(path, '/') }
+
+# ==============================================================================
+# Certbot Plugin Flags
+# Define an additional set of flags to the 'certbot certonly' command.
+# The following flags will always be provided:
+#   -n --agree-tos --domain DOMAIN --email EMAIL
+#
+# However additional plugin flags to 'certonly' are always required as the
+# command is ran non-interactively. The exact flags depend on the application
+# but are likely either: --nginx or --apache
+# ==============================================================================
+config :certbot_plugin_flags, default: '--apache'
+
+# ==============================================================================
+# Cron Path
+# The file path of the auto-renewal crontab. This file will be created when
+# requested.
+#
+# All paths are expanded from the file system root directory
+# ==============================================================================
+config :cron_path,
+        default: '/etc/cron.daily/flight-cert',
+        transform_with: ->(path) { File.expand_path(path, '/') }
+
+# ==============================================================================
+# Log Path
+# The file the logger will write to. It will write to standard error when set
+# to nil.
+#
+# It may be:
+#  * A relative path from the directory containing this file,
+#  * An absolute path, or
+#  * Nil to print to standard error
+# ==============================================================================
+config :log_path,
+        required: false,
+        default: '../var/log/flight-cert.log',
+        transform_with: ->(p) { p ? File.expand_path(p, __dir__) : p }
 
 # ==============================================================================
 # Log level

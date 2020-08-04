@@ -88,7 +88,7 @@ module FlightCert
     if Config::CACHE.development?
       create_command 'console' do |c|
         c.action do
-          FlightHowto::Command.new([], {}).instance_exec { binding.pry }
+          FlightCert::Command.new([], {}).instance_exec { binding.pry }
         end
       end
     end

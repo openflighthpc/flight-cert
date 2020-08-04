@@ -140,13 +140,29 @@ module FlightCert
       end
     end
 
+    def selfsigned_privkey
+      File.join(selfsigned_dir, 'privkey.pem')
+    end
+
+    def selfsigned_fullchain
+      File.join(selfsigned_dir, 'fullchain.pem')
+    end
+
+    def letsencrypt_fullchain
+      File.join(letsencrypt_live_dir, domain, 'fullchain.pem')
+    end
+
+    def letsencrypt_privkey
+      File.join(letsencrypt_live_dir, domain, 'privkey.pem')
+    end
+
     # Loads the reference file
     Config.load_reference REFERENCE_PATH
 
     # Caches the config
     Config::CACHE = if File.exists? CONFIG_PATH
-      data = File.read(CONFIG_PATH)
-      Config.new(YAML.load(data, symbolize_names: true)).tap do |c|
+      data = YAML.load(File.read(CONFIG_PATH), symbolize_names: true)
+      Config.new(data).tap do |c|
         c.logger.info "Loaded Config: #{CONFIG_PATH}"
       end
     else
