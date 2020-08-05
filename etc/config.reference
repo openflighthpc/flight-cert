@@ -59,20 +59,20 @@ config :email, required: false
 config :domain, required: false
 
 # ==============================================================================
-# SSL Private Key
-# Define the path to the target SSL private key. Any external application
-# which requires the private key, should match this path.
+# Self Signed Directory
+# Define the directory to where self signed certificates will be stored. This
+# path should not be used by the external web service.
 #
 # It may either be:
 #  * A relative path from the directory containing this file, or
 #  * An absolute path
 # ==============================================================================
-config :ssl_privkey,
-        default: 'ssl/privkey.pem',
+config :selfsigned_dir,
+        default: 'self-signed',
         transform_with: ->(path) { File.expand_path(path, __dir__) }
 
 # ==============================================================================
-# SSL Fullchain Certificate
+# SSL Fullchain Certificate and Private Key
 # Define the path to the target SSL fullchain  and private key files. The
 # application will symlink the relevant files to these locations. The external
 # web service should use these symlink files.
@@ -84,8 +84,8 @@ config :ssl_privkey,
 config :ssl_fullchain,
         default: 'ssl/fullchain.pem',
         transform_with: ->(path) { File.expand_path(path, __dir__) }
-config :selfsigned_dir,
-        default: 'self-signed',
+config :ssl_privkey,
+        default: 'ssl/privkey.pem',
         transform_with: ->(path) { File.expand_path(path, __dir__) }
 
 # ==============================================================================

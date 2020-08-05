@@ -183,7 +183,7 @@ module FlightCert
         cmd = self[prop]
         logger.info "Command: #{cmd}"
         results = nil
-        Bundler.with_original_env do
+        Bundler.with_unbundled_env do
           results = Open3.capture3(cmd).tap do |r|
             logger.info "Exited: #{r.last.exitstatus}"
             logger.debug "STDOUT: #{r[0]}"
