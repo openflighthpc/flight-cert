@@ -42,6 +42,23 @@ module FlightCert
 
         # Link the certificates into place
         Config::CACHE.link_certificates
+
+        # Attempts to restart the service
+        if File.exists? Config::CACHE.enabled_https_path
+          _, _, status = Config::CACHE.run_restart_command
+          unless status.success?
+            raise GeneralError, <<~ERROR.chomp
+              Failed to restart the web server with the new certificate!
+            ERROR
+          end
+
+        # Notifies the user how to enable https
+        else
+          $stderr.puts <<~WARN
+            The HTTPs server does not appear to be running. It can be enabled with:
+            #{Paint["#{Config::CACHE.app_name} enable-https", :yellow]}
+          WARN
+        end
       end
 
       ##
