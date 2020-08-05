@@ -24,6 +24,8 @@
 # For more information on FlightCert, please visit:
 # https://github.com/openflighthpc/flight-cert
 #==============================================================================
+
+require 'paint'
 require 'ostruct'
 
 module FlightCert

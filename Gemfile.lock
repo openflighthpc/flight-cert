@@ -25,6 +25,7 @@ PLATFORMS
 DEPENDENCIES
   commander-openflighthpc (> 2.0.0)
   hashie
+  paint
   pry
   pry-byebug
 

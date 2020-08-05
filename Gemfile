@@ -29,6 +29,7 @@ source 'https://rubygems.org'
 
 gem 'commander-openflighthpc', '> 2.0.0'
 gem 'hashie'
+gem 'paint'
 
 group :development do
   gem 'pry'

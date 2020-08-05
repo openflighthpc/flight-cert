@@ -28,6 +28,66 @@
 module FlightCert
   module Commands
     class CertGen < Command
+      def run
+        process_options
+        ensure_domain_is_set
+        ensure_letsencrypt_has_an_email
+        Config::CACHE.save
+      end
+
+      ##
+      # Updates the internal config with the new option flags
+      def process_options
+        if options.cert_type && Config::ALL_TYPES.include?(options.cert_type)
+          Config::CACHE.cert_type = options.cert_type
+        elsif options.cert_type
+          raise InputError, <<~ERROR.chomp
+            Unrecognized certificate type: #{options.cert_type}
+            Please select either: lets-encrypt or self-signed
+          ERROR
+        end
+
+
+        # Updates the email field
+        if options.email&.empty?
+          $stderr.puts <<~ERROR.chomp
+            Clearing the email setting...
+          ERROR
+          Config::CACHE.delete(:email)
+        elsif options.email
+          Config::CACHE.email = options.email
+        end
+
+        # Updates the domain field
+        if options.domain&.empty?
+          $stderr.puts <<~ERROR.chomp
+            Clearing the domain setting...
+          ERROR
+          Config::CACHE.delete(:domain)
+        elsif options.domain
+          Config::CACHE.domain  = options.domain
+        end
+      end
+
+      ##
+      # Defaults the domain to the hostname FQDN if unset
+      def ensure_domain_is_set
+        Config::CACHE.domain = `hostname --fqdn`.chomp
+        $stderr.puts <<~ERROR.chomp
+          Reverting to the default domain: #{Config::CACHE.domain}
+        ERROR
+      end
+
+      ##
+      # Errors if the email is unset for LetsEncrypt certificates
+      def ensure_letsencrypt_has_an_email
+        return if Config::CACHE.email? || !Config::CACHE.letsencrypt?
+        puts <<~ERROR.chomp
+          Let's Encrypt  certificates require an email address!
+          Please provide the following flag: #{Paint['--email EMAIL', :yellow]}
+        ERROR
+        exit 1
+      end
     end
   end
 end

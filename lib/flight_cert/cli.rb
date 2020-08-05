@@ -42,7 +42,7 @@ module FlightCert
     program :help_paging, false
     default_command :help
 
-    if ENV['TERM'] !~ /^xterm/ && ENV['TERM'] !~ /rxvt/
+    if ENV['TERM'] !~ /^xterm/ && ENV['TERM'] !~ /rxvt/ && ENV['TERM'] !~ /256color/
       Paint.mode = 0
     end
 

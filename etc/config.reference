@@ -55,9 +55,8 @@ config :email, required: false
 # ==============================================================================
 # Domain
 # Stores the domain all newly generated certificates will be associated with.
-# By default it will be inferred from the hostname
 # ==============================================================================
-config :domain, default: `hostname --fqdn`.chomp
+config :domain, required: false
 
 # ==============================================================================
 # SSL Private Key

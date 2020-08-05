@@ -74,6 +74,10 @@ module FlightCert
 
     config :development
 
+    def save
+      File.write CONFIG_PATH, YAML.dump(self.to_h)
+    end
+
     def log_path_or_stderr
       if log_level == 'disabled'
         '/dev/null'
@@ -114,11 +118,11 @@ module FlightCert
       end
     end
 
-    def lets_encrypt?
+    def letsencrypt?
       resolved_cert_type == :lets_encrypt
     end
 
-    def self_signed?
+    def selfsigned?
       resolved_cert_type == :self_signed
     end
 
