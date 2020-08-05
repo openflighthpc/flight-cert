@@ -27,36 +27,22 @@
 
 module FlightCert
   module Commands
-    class EnableHttps < Command
+    class DisableHttps < Command
       def run
-        unless File.exists?(Config::CACHE.ssl_fullchain) && File.exists?(Config::CACHE.ssl_privkey)
-          raise GeneralError, <<~ERROR.chomp
-            In order to enable HTTPs a set of SSL certificates need to be generated.
-            Please run the following to generate the certificates with Let's Encrypt:
-            #{Paint["#{Config::CACHE.app_name} cert-gen --cert-type lets-encrypt --domain DOMAIN --email EMAIL", :yellow]}
-          ERROR
+        unless File.exists? Config::CACHE.enabled_https_path
+          raise GeneralError, 'The HTTPs server is already disabled'
         end
 
-        if File.exists? Config::CACHE.enabled_https_path
-          raise GeneralError, 'The HTTPs server is already enabled'
-        end
-
-        unless File.exists? Config::CACHE.disabled_https_path
-          raise GeneralError, "Can not enable the HTTPs server as the config does not exist: #{Config::CACHE.disabled_https_path}"
-        end
-
-        FileUtils.mkdir_p File.dirname(Config::CACHE.enabled_https_path)
-        FileUtils.mv Config::CACHE.disabled_https_path, Config::CACHE.enabled_https_path
+        FileUtils.mkdir_p File.dirname(Config::CACHE.disabled_https_path)
+        FileUtils.mv Config::CACHE.enabled_https_path, Config::CACHE.disabled_https_path
 
         # Attempts to restart the server
         _, _, status = Config::CACHE.run_restart_command
         if status.success?
-          puts 'HTTPs has been enabled'
+          puts 'HTTPs has been disabled'
         else
           raise GeneralError, <<~ERROR.chomp
-            HTTPs has been enabled but the web server failed to restart!
-            HTTPs maybe disabled again with:
-            #{Paint["#{Config::CACHE.app_name} disable-https", :yellow]}
+            HTTPs has been disabled but the web server failed to restart!
           ERROR
         end
       end

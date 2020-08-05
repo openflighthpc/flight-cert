@@ -108,7 +108,7 @@ module FlightCert
       DESC
     end
 
-    create_command 'disabled-https' do |c|
+    create_command 'disable-https' do |c|
       c.summary = 'Disable HTTPS'
       c.description = <<~DESC
         HTTPS support can be disabled at any time with the following command:
