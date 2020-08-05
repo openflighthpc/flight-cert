@@ -65,7 +65,7 @@ module FlightCert
       define_method(:"#{sym}?") do
         value = send(sym)
         if value.respond_to?(:empty?)
-          value.empty?
+          !value.empty?
         else
           send(sym) ? true : false
         end
