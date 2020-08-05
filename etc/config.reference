@@ -142,6 +142,15 @@ config :cron_path,
         transform_with: ->(path) { File.expand_path(path, '/') }
 
 # ==============================================================================
+# Cron Script
+# Define the script cron that will be ran by cron to enable automatic
+# certificate renewal
+#
+# Automatic renewal is disabled without this parameter
+# ==============================================================================
+config :cron_script
+
+# ==============================================================================
 # Log Path
 # The file the logger will write to. It will write to standard error when set
 # to nil.

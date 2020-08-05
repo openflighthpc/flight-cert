@@ -85,6 +85,19 @@ module FlightCert
       c.slop.bool '--config-only', 'Only update the internal configuration, skips certificate generation'
     end
 
+    create_command 'cron-renewal' do |c|
+      c.summary = 'Manage automatic renewal of SSL certificates'
+      c.description = <<~DESC.chomp
+        A Let's Encrypt certificate will need to be periodically renewed.  You
+        can enable automatic renewal of Let's Encrypt certificates by running:
+        '#{Config::CACHE.app_name} cron-renewal'
+
+        Self-signed certificates are valid for 10 years and automatic renewal is not
+        supported.
+      DESC
+      c.slop.bool '--disable', 'Disable (instead of enable) automatic certificate renewal'
+    end
+
     if Config::CACHE.development?
       create_command 'console' do |c|
         c.action do
