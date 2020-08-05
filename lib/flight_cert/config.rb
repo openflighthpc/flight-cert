@@ -28,6 +28,7 @@
 require 'yaml'
 require 'logger'
 require 'hashie'
+require 'open3'
 
 require_relative 'errors'
 
@@ -163,8 +164,31 @@ module FlightCert
       File.join(letsencrypt_live_dir, domain, 'privkey.pem')
     end
 
+    ##
+    # Symlinks the relevant certificate/private key into the SSL directory
+    def link_certificates
+      FileUtils.mkdir_p File.dirname(ssl_privkey)
+      FileUtils.mkdir_p File.dirname(ssl_fullchain)
+      FileUtils.ln_sf (letsencrypt? ? letsencrypt_privkey   : selfsigned_privkey  ), ssl_privkey
+      FileUtils.ln_sf (letsencrypt? ? letsnecrypt_fullchain : slefsigned_fullchain), ssl_fullchain
+    end
+
     # Loads the reference file
     Config.load_reference REFERENCE_PATH
+
+    # Defines the run_*_command methods from the defined properties
+    # These will execute the basic system commands with logging
+    self.properties.select { |m| /\A.*_command\Z/.match? m }.each do |prop|
+      define_method("run_#{prop}") do
+        cmd = self[prop]
+        logger.info "Command: #{cmd}"
+        Open3.capture3(cmd).tap do |results|
+          logger.info "Exited: #{results.last.exitstatus}"
+          logger.debug "STDOUT: #{results[0]}"
+          logger.debug "STDERR: #{results[1]}"
+        end
+      end
+    end
 
     # Caches the config
     Config::CACHE = if File.exists? CONFIG_PATH

@@ -26,6 +26,7 @@
 #==============================================================================
 
 require_relative '../self_signed_builder'
+require 'shellwords'
 
 module FlightCert
   module Commands
@@ -36,14 +37,11 @@ module FlightCert
         ensure_letsencrypt_has_an_email
         Config::CACHE.save
 
-        # Generate a self signed certificate
-        if Config::CACHE.selfsigned?
-          generate_selfsigned
-          link_files privkey: Config::CACHE.selfsigned_privkey,
-                     fullchain: Config::CACHE.selfsigned_fullchain
-        else
-          raise NotImplementedError
-        end
+        # Generate the certificates
+        Config::CACHE.letsencrypt? ? generate_letsencrypt : generate_selfsigned
+
+        # Link the certificates into place
+        Config::CACHE.link_certificates
       end
 
       ##
@@ -57,7 +55,6 @@ module FlightCert
             Please select either: lets-encrypt or self-signed
           ERROR
         end
-
 
         # Updates the email field
         if options.email&.empty?
@@ -102,12 +99,38 @@ module FlightCert
       end
 
       ##
-      # Symlinks the SSL directory to the actual private key and fullchain cert
-      def link_files(privkey:, fullchain:)
-        FileUtils.mkdir_p File.dirname(Config::CACHE.ssl_privkey)
-        FileUtils.mkdir_p File.dirname(Config::CACHE.ssl_fullchain)
-        FileUtils.ln_sf   privkey,    Config::CACHE.ssl_privkey
-        FileUtils.ln_sf   fullchain,  Config::CACHE.ssl_fullchain
+      # Generates a lets encrypt certificate
+      def generate_letsencrypt
+        # Checks if the external service is running
+        _, _, status = Config::CACHE.run_status_command
+        unless status.success?
+          msg = "The external web service does not appear to be running!"
+          if Config::CACHE.start_command_prompt
+            msg += "\nPlease start it with:\n#{Paint[Config::CACHE.start_command_prompt, :yellow]}"
+          end
+          raise GeneralError, msg
+        end
+
+        puts "Generating a Let's Encrypt certificate, please wait..."
+        cmd = [
+          Config::CACHE.certbot_bin,
+          'certonly', '-n', '--agree-tos',
+          '--domain', Config::CACHE.domain,
+          '--email', Config::CACHE.email,
+          *Shellwords.shellsplit(Config::CACHE.certbot_plugin_flags)
+        ]
+        Config::CACHE.logger.info "Command (approx): #{cmd.join(' ')}"
+        out, err, status = Open3.capture3(*cmd)
+        Config::CACHE.logger.info "Exited: #{status.exitstatus}"
+        Config::CACHE.logger.debug "STDOUT: #{out}"
+        Config::CACHE.logger.debug "STDERR: #{err}"
+        unless status.success?
+          raise GeneralError, <<~ERROR.chomp
+            Failed to generate the Let's Encrypt certificate with the following error:
+
+            #{err}
+          ERROR
+        end
       end
 
       ##
