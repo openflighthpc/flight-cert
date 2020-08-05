@@ -98,6 +98,25 @@ module FlightCert
       c.slop.bool '--disable', 'Disable (instead of enable) automatic certificate renewal'
     end
 
+    create_command 'enable-https' do |c|
+      c.summary = 'Enable HTTPS'
+      c.description = <<~DESC.chomp
+        Once an SSL certificate has been generated, HTTPS support can be enabled
+        with the following command:
+
+        '#{Config::CACHE.app_name} enable-https'
+      DESC
+    end
+
+    create_command 'disabled-https' do |c|
+      c.summary = 'Disable HTTPS'
+      c.description = <<~DESC
+        HTTPS support can be disabled at any time with the following command:
+
+        '#{Config::CACHE.app_name} disable-https'
+      DESC
+    end
+
     if Config::CACHE.development?
       create_command 'console' do |c|
         c.action do

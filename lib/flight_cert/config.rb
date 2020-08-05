@@ -170,7 +170,7 @@ module FlightCert
       FileUtils.mkdir_p File.dirname(ssl_privkey)
       FileUtils.mkdir_p File.dirname(ssl_fullchain)
       FileUtils.ln_sf (letsencrypt? ? letsencrypt_privkey   : selfsigned_privkey  ), ssl_privkey
-      FileUtils.ln_sf (letsencrypt? ? letsnecrypt_fullchain : slefsigned_fullchain), ssl_fullchain
+      FileUtils.ln_sf (letsencrypt? ? letsencrypt_fullchain : selfsigned_fullchain), ssl_fullchain
     end
 
     # Loads the reference file
