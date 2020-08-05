@@ -73,26 +73,17 @@ config :ssl_privkey,
 
 # ==============================================================================
 # SSL Fullchain Certificate
-# Define the path to the target SSL fullchain certificate. Any external
-# application which requires the certificate, should match this path.
+# Define the path to the target SSL fullchain  and private key files. The
+# application will symlink the relevant files to these locations. The external
+# web service should use these symlink files.
 #
-# It may either be:
+# The paths maybe either:
 #  * A relative path from the directory containing this file, or
 #  * An absolute path
 # ==============================================================================
 config :ssl_fullchain,
         default: 'ssl/fullchain.pem',
         transform_with: ->(path) { File.expand_path(path, __dir__) }
-
-# ==============================================================================
-# Self Signed Directory
-# Define the directory where the self signed fullchain certificate and private
-# key will be stored.
-#
-# It may either be:
-#  * A relative path from the directory containing this file, or
-#  * An absolute path
-# ==============================================================================
 config :selfsigned_dir,
         default: 'self-signed',
         transform_with: ->(path) { File.expand_path(path, __dir__) }
@@ -108,62 +99,56 @@ config :letsencyrpt_live_dir,
         transform_with: ->(path) { File.expand_path(path, '/') }
 
 # ==============================================================================
-# Certbot "Binary"
-# Define the path to the certbot bin file. For internal security reasons, certbot
-# must be executed via an absolute path.
+# Certbot "Binary" and Flags
+# Define the path to the certbot bin file. For internal security reasons,
+# certbot binary file must be an absolute path. Relative paths will be expanded
+# from the root directory.
 #
-# All paths are expanded from the file system root directory
+# The "certbot plugin flags" are any additional options to certbot's certonly
+# command. The --domain DOMAIN, --email EMAIL, --n, --agree-tos flags will be
+# automatically set by the application. However additional flags maybe required
+# depending on your system's configuration.
 # ==============================================================================
 config :certbot_bin,
         default: '/usr/local/bin/certbot',
         transform_with: ->(path) { File.expand_path(path, '/') }
-
-# ==============================================================================
-# Certbot Plugin Flags
-# Define an additional set of flags to the 'certbot certonly' command.
-# The following flags will always be provided:
-#   -n --agree-tos --domain DOMAIN --email EMAIL
-#
-# However additional plugin flags to 'certonly' are always required as the
-# command is ran non-interactively. The exact flags depend on the application
-# but are likely either: --nginx or --apache
-# ==============================================================================
 config :certbot_plugin_flags, default: '--nginx'
 
 # ==============================================================================
-# Cron Path
-# The file path of the auto-renewal crontab. This file will be created when
-# requested.
+# Cron Path and Script
+# Define the path to and the content of the auto-renewal cron scirpt. Ultimately
+# it needs to run 'bin/cert cert-gen' in some form without any arguments.
 #
-# All paths are expanded from the file system root directory
+# However due to the idiosyncrasies of ruby's versioning, the content of the
+# script will be platform/distribution specific. As such no default has been
+# given for 'cron_scirpt'. It will need to be manually set in the config before
+# auto renewals are possible.
+#
+# The cron path is expanded from the file system root directory
 # ==============================================================================
 config :cron_path,
         default: '/etc/cron.daily/flight-cert',
         transform_with: ->(path) { File.expand_path(path, '/') }
-
-# ==============================================================================
-# Cron Script
-# Define the script cron that will be ran by cron to enable automatic
-# certificate renewal
-#
-# Automatic renewal is disabled without this parameter
-# ==============================================================================
 config :cron_script
 
 # ==============================================================================
-# Log Path
-# The file the logger will write to. It will write to standard error when set
-# to nil.
+# Enable/ Display HTTPS Config
+# Define the paths to the enabled and disabled HTTPS config file. The enabled
+# path should be included by the external web service to provide https services.
 #
-# It may be:
-#  * A relative path from the directory containing this file,
-#  * An absolute path, or
-#  * Nil to print to standard error
+# The disabled path is a storage location of the config when not in use. It
+# should not be included by the external web service.
+#
+# The paths maybe either:
+#  * A relative path from the directory containing this file, or
+#  * An absolute path
 # ==============================================================================
-config :log_path,
-        required: false,
-        default: '../var/log/flight-cert.log',
-        transform_with: ->(p) { p ? File.expand_path(p, __dir__) : p }
+config :enabled_https_path,
+       default: 'https.conf',
+       transform_with: ->(path) { File.expand_path(path, __dir__) }
+config :disabled_https_path,
+       default: 'https.conf.disabled',
+       transform_with: ->(path) { File.expand_path(path, __dir__) }
 
 # ==============================================================================
 # Service Status Command
@@ -191,9 +176,21 @@ config :restart_command, default: 'echo No Restart Command!; exit 1'
 config :start_command_prompt
 
 # ==============================================================================
+# Log Path
+# The file the logger will write to. It will write to standard error when set
+# to nil.
+#
+# It may be:
+#  * A relative path from the directory containing this file,
+#  * An absolute path, or
+#  * Nil to print to standard error
+#
 # Log level
 # Set at which severity the application will log
 # Valid levels: 'disabled', 'fatal', 'error', 'warn', 'info', 'debug'
 # ==============================================================================
+config :log_path,
+        required: false,
+        default: '../var/log/flight-cert.log',
+        transform_with: ->(p) { p ? File.expand_path(p, __dir__) : p }
 config :log_level, default: 'error'
-
