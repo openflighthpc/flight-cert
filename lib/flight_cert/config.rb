@@ -182,11 +182,15 @@ module FlightCert
       define_method("run_#{prop}") do
         cmd = self[prop]
         logger.info "Command: #{cmd}"
-        Open3.capture3(cmd).tap do |results|
-          logger.info "Exited: #{results.last.exitstatus}"
-          logger.debug "STDOUT: #{results[0]}"
-          logger.debug "STDERR: #{results[1]}"
+        results = nil
+        Bundler.with_original_env do
+          results = Open3.capture3(cmd).tap do |r|
+            logger.info "Exited: #{r.last.exitstatus}"
+            logger.debug "STDOUT: #{r[0]}"
+            logger.debug "STDERR: #{r[1]}"
+          end
         end
+        return results
       end
     end
 
