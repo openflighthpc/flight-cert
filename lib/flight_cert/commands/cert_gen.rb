@@ -25,6 +25,8 @@
 # https://github.com/openflighthpc/flight-cert
 #==============================================================================
 
+require_relative '../self_signed_builder'
+
 module FlightCert
   module Commands
     class CertGen < Command
@@ -33,6 +35,15 @@ module FlightCert
         ensure_domain_is_set
         ensure_letsencrypt_has_an_email
         Config::CACHE.save
+
+        # Generate a self signed certificate
+        if Config::CACHE.selfsigned?
+          generate_selfsigned
+          link_files privkey: Config::CACHE.selfsigned_privkey,
+                     fullchain: Config::CACHE.selfsigned_fullchain
+        else
+          raise NotImplementedError
+        end
       end
 
       ##
@@ -72,6 +83,7 @@ module FlightCert
       ##
       # Defaults the domain to the hostname FQDN if unset
       def ensure_domain_is_set
+        return if Config::CACHE.domain?
         Config::CACHE.domain = `hostname --fqdn`.chomp
         $stderr.puts <<~ERROR.chomp
           Reverting to the default domain: #{Config::CACHE.domain}
@@ -87,6 +99,25 @@ module FlightCert
           Please provide the following flag: #{Paint['--email EMAIL', :yellow]}
         ERROR
         exit 1
+      end
+
+      ##
+      # Symlinks the SSL directory to the actual private key and fullchain cert
+      def link_files(privkey:, fullchain:)
+        FileUtils.mkdir_p File.dirname(Config::CACHE.ssl_privkey)
+        FileUtils.mkdir_p File.dirname(Config::CACHE.ssl_fullchain)
+        FileUtils.ln_sf   privkey,    Config::CACHE.ssl_privkey
+        FileUtils.ln_sf   fullchain,  Config::CACHE.ssl_fullchain
+      end
+
+      ##
+      # Generates a self signed certificate
+      def generate_selfsigned
+        puts "Generating a self-signed certificate with a 10 year expiry. Please wait..."
+        builder = SelfSignedBuilder.new(Config::CACHE.domain, Config::CACHE.email)
+        FileUtils.mkdir_p Config::CACHE.selfsigned_dir
+        File.write        Config::CACHE.selfsigned_fullchain, builder.to_fullchain
+        File.write        Config::CACHE.selfsigned_privkey,   builder.key.to_s
       end
     end
   end
