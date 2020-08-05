@@ -95,12 +95,13 @@ module FlightCert
       end
 
       ##
-      # Defaults the domain to the hostname FQDN if unset
+      # Raises an error if the domain has not been set
       def ensure_domain_is_set
         return if Config::CACHE.domain?
         Config::CACHE.domain = `hostname --fqdn`.chomp
-        $stderr.puts <<~ERROR.chomp
-          Reverting to the default domain: #{Config::CACHE.domain}
+        raise GeneralError, <<~ERROR.chomp
+          A certificate can not be generated without a domain!
+          Possible try the following: #{Paint['--domain "$(hostname --fqdn)"', :yellow]}
         ERROR
       end
 
@@ -109,7 +110,7 @@ module FlightCert
       def ensure_letsencrypt_has_an_email
         return if Config::CACHE.email? || !Config::CACHE.letsencrypt?
         puts <<~ERROR.chomp
-          Let's Encrypt  certificates require an email address!
+          A Let's Encrypt certificates can not be generated without an email!
           Please provide the following flag: #{Paint['--email EMAIL', :yellow]}
         ERROR
         exit 1
