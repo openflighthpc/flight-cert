@@ -75,7 +75,10 @@ module FlightCert
     config :development
 
     def save
-      File.write CONFIG_PATH, YAML.dump(self.to_h)
+      # Removes all the default settings
+      blank = self.class.new
+      data = self.to_h.reject { |k, v| blank[k] == v }
+      File.write CONFIG_PATH, YAML.dump(data)
     end
 
     def log_path_or_stderr
