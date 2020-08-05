@@ -94,7 +94,7 @@ config :ssl_privkey,
 #
 # All paths are expanded from the file system root directory
 # ==============================================================================
-config :letsencyrpt_live_dir,
+config :letsencrypt_live_dir,
         default: '/etc/letsencrypt/live',
         transform_with: ->(path) { File.expand_path(path, '/') }
 
