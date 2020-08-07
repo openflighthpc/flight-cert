@@ -44,7 +44,7 @@ module FlightCert
         Config::CACHE.link_certificates
 
         # Attempts to restart the service
-        if File.exists? Config::CACHE.enabled_https_path
+        if Config::CACHE.https_enabled?
           _, _, status = Config::CACHE.run_restart_command
           unless status.success?
             raise GeneralError, <<~ERROR.chomp

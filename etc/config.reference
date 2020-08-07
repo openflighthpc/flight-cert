@@ -132,23 +132,29 @@ config :cron_path,
 config :cron_script
 
 # ==============================================================================
-# Enable/ Display HTTPS Config
-# Define the paths to the enabled and disabled HTTPS config file. The enabled
-# path should be included by the external web service to provide https services.
+# HTTPS Enabled Paths
+# Specify a list of files required by the HTTPs which are normally disabled.
+# The following assumptions must be valid for this application to function:
+# * All the paths form a "path pair" of enabled and disabled files,
+# * All relative paths are from the directory containing this reference file,
+# * The HTTPs server is only considered running if all the enabled files exist,
+# * This config provides a list of "enable paths",
+# * A "disable path" matches its corresponding "enable path" with an
+#   additional '.disabled' file extension, and
+# * All the disabled files exist.
 #
-# The disabled path is a storage location of the config when not in use. It
-# should not be included by the external web service.
+# The `enable-https` will generate symlinks from the enable paths to their
+# corresponding disabled path. The `disable-https` method will remove all these
+# symlinks.
 #
-# The paths maybe either:
-#  * A relative path from the directory containing this file, or
-#  * An absolute path
+# This service can not generate the content of the disabled files. They must
+# exist before using this application. Failure to ensure the disabled files
+# exist risks the generation of dangling symlinks.
 # ==============================================================================
-config :enabled_https_path,
-       default: 'https.conf',
-       transform_with: ->(path) { File.expand_path(path, __dir__) }
-config :disabled_https_path,
-       default: 'https.conf.disabled',
-       transform_with: ->(path) { File.expand_path(path, __dir__) }
+config :https_enable_paths, default: [], transform_with: ->(paths) do
+  paths = [paths] unless paths.is_a?(Array)
+  paths.map { |p| File.expand_path(p, __dir__) }
+end
 
 # ==============================================================================
 # Service Status Command

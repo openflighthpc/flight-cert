@@ -29,6 +29,7 @@ module FlightCert
   module Commands
     class EnableHttps < Command
       def run
+        # Ensures the SSL cert has been generated before enabling https
         unless File.exists?(Config::CACHE.ssl_fullchain) && File.exists?(Config::CACHE.ssl_privkey)
           raise GeneralError, <<~ERROR.chomp
             In order to enable HTTPs a set of SSL certificates need to be generated.
@@ -37,16 +38,23 @@ module FlightCert
           ERROR
         end
 
-        if File.exists? Config::CACHE.enabled_https_path
-          raise GeneralError, 'The HTTPs server is already enabled'
+        # Do not attempt to re-enable https
+        raise GeneralError, 'The HTTPs server is already enabled' if Config::CACHE.https_enabled?
+
+        # Ensure no data is overridden by a link, in practice this shouldn't happen
+        Config::CACHE.https_enable_paths.each do |path|
+          if File.exists?(path) && !File.symlink?(path)
+            raise InternalError, <<~ERROR.chomp
+              Cowardly refusing to enable HTTPS as the following file already exists:
+              #{Paint[path, :yellow]}
+            ERROR
+          end
         end
 
-        unless File.exists? Config::CACHE.disabled_https_path
-          raise GeneralError, "Can not enable the HTTPs server as the config does not exist: #{Config::CACHE.disabled_https_path}"
+        # Generate all the links to the disabled paths
+        Config::CACHE.https_enable_paths.each do |path|
+          FileUtils.ln_sf "#{path}.disabled", path
         end
-
-        FileUtils.mkdir_p File.dirname(Config::CACHE.enabled_https_path)
-        FileUtils.mv Config::CACHE.disabled_https_path, Config::CACHE.enabled_https_path
 
         # Attempts to restart the server
         _, _, status = Config::CACHE.run_restart_command

@@ -73,6 +73,9 @@ module FlightCert
       end
     end
 
+    # Loads the reference file
+    Config.load_reference REFERENCE_PATH
+
     config :development
 
     def save
@@ -173,8 +176,19 @@ module FlightCert
       FileUtils.ln_sf (letsencrypt? ? letsencrypt_fullchain : selfsigned_fullchain), ssl_fullchain
     end
 
-    # Loads the reference file
-    Config.load_reference REFERENCE_PATH
+    ##
+    # Checks if all the enable https paths have been symlinked
+    def https_enabled?
+      https_enable_paths.all? { |p| File.symlink?(p) }
+    end
+
+    ##
+    # Checks if the https server is fully disabled
+    # NOTE: This is not the logical opposite of https_enable? due to the technical
+    #       possibility of a mixed state. However this in practice shouldn't occur
+    def https_disabled?
+      !https_enable_paths.any? { |p| File.symlink?(p) }
+    end
 
     # Defines the run_*_command methods from the defined properties
     # These will execute the basic system commands with logging
