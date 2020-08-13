@@ -55,7 +55,7 @@ module FlightCert
         # Notifies the user how to enable https
         else
           $stderr.puts <<~WARN
-            The HTTPs server does not appear to be running. It can be enabled with:
+            You can now enable the HTTPS server with:
             #{Paint["#{Config::CACHE.app_name} enable-https", :yellow]}
           WARN
         end
@@ -142,7 +142,9 @@ module FlightCert
         Config::CACHE.logger.info "Exited: #{status.exitstatus}"
         Config::CACHE.logger.debug "STDOUT: #{out}"
         Config::CACHE.logger.debug "STDERR: #{err}"
-        unless status.success?
+        if status.success?
+          puts 'Certificate generated.'
+        else
           raise GeneralError, <<~ERROR.chomp
             Failed to generate the Let's Encrypt certificate with the following error:
 
@@ -159,6 +161,7 @@ module FlightCert
         FileUtils.mkdir_p Config::CACHE.selfsigned_dir
         File.write        Config::CACHE.selfsigned_fullchain, builder.to_fullchain
         File.write        Config::CACHE.selfsigned_privkey,   builder.key.to_s
+        puts 'Certificate generated.'
       end
     end
   end
