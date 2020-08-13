@@ -69,14 +69,15 @@ module FlightCert
 
         In order to generate a Let's Encrypt certificate, you will require a
         publicly available DNS entry and an email address.  The HTTP server will
-        also need to be running to allow Let's Encrypt to successfully preform a DNS
+        also need to be running to allow Let's Encrypt to successfully perform a DNS
         challenge.  Once ready, A Let's Encrypt certificate can be generated with
         the following command:
 
         '#{Config::CACHE.app_name} cert-gen --cert-type lets-encrypt --domain DOMAIN --email EMAIL'
 
         Alternatively, a self-signed SSL certificate valid for 10 years can be
-        generated, buy running the following command:
+        generated, by running the following command:
+
         '#{Config::CACHE.app_name} cert-gen --cert-type self-signed'
       DESC
       c.slop.string '--cert-type', 'Select the certificate type: lets-encrypt|self-signed'
@@ -95,25 +96,21 @@ module FlightCert
         Self-signed certificates are valid for 10 years and automatic renewal is not
         supported.
       DESC
-      c.slop.bool '--disable', 'Disable (instead of enable) automatic certificate renewal'
+      c.slop.bool '--disable', 'Disable automatic certificate renewal. Default is to enable'
     end
 
     create_command 'enable-https' do |c|
       c.summary = 'Enable HTTPS'
       c.description = <<~DESC.chomp
-        Once an SSL certificate has been generated, HTTPS support can be enabled
-        with the following command:
-
-        '#{Config::CACHE.app_name} enable-https'
+        Enable HTTPS access to Alces Flight webservices.
       DESC
     end
 
     create_command 'disable-https' do |c|
       c.summary = 'Disable HTTPS'
       c.description = <<~DESC
-        HTTPS support can be disabled at any time with the following command:
-
-        '#{Config::CACHE.app_name} disable-https'
+        Disable HTTPS access to Alces Flight webservices.
+        Some services will be available over HTTP whilst others will no longer be available.
       DESC
     end
 
