@@ -78,6 +78,11 @@ module FlightCert
 
     config :development
 
+    # DEPRECATED: Please use program_name instead
+    def app_name
+      program_name
+    end
+
     def save
       # Removes all the default settings
       blank = self.class.new

@@ -179,7 +179,7 @@ config :restart_command, default: 'echo No Restart Command!; exit 1'
 # An optional command to include in the error message on how to start the web
 # server. It is not executed by the tool
 # ==============================================================================
-#<% if start_command -%><%= start_command %><% else -%>
+#<% if start_command_prompt -%><%= start_command_prompt %><% else -%>
 config :start_command_prompt
 #<% end -%>
 
