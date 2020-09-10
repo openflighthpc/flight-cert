@@ -106,7 +106,7 @@ config :letsencrypt_live_dir, default: '/etc/letsencrypt/live'
 # automatically set by the application. However additional flags maybe required
 # depending on your system's configuration.
 # ==============================================================================
-#<% if certbot -><%= certbot %><% else -%>
+#<% if certbot -%><%= certbot %><% else -%>
 config :certbot_bin, default: '/usr/local/bin/certbot'
 config :certbot_plugin_flags, default: '--nginx'
 #<% end -%>
