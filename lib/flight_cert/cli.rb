@@ -35,10 +35,16 @@ module FlightCert
   module CLI
     extend Commander::CLI
 
-    program :application, "Flight WWW"
-    program :name, Config::CACHE.app_name
+    # Configures the CLI from the config
+    regex = /(?<=\Aprogram_).*\Z/
+    Config.properties.each do |prop|
+      if match = regex.match(prop.to_s)
+        sym = match[0].to_sym
+        program sym, Config::CACHE[prop]
+      end
+    end
+
     program :version, "v#{FlightCert::VERSION}"
-    program :description, 'Manage the HTTPs server and SSL certificates'
     program :help_paging, false
     default_command :help
 
