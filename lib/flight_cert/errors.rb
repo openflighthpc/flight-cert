@@ -43,6 +43,9 @@ module FlightCert
     end
   end
 
+  # NOTE: SystemError is used for backwards compatibility with errors which
+  #       aren't internal but still exit 1
+  SystemError = Error.define_class(1)
   InternalError = Error.define_class(1)
   GeneralError = Error.define_class(2)
   InputError = GeneralError.define_class(3)
