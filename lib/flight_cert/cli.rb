@@ -84,7 +84,7 @@ module FlightCert
         Alternatively, a self-signed SSL certificate valid for 10 years can be
         generated, by running the following command:
 
-        '#{Config::CACHE.app_name} cert-gen --cert-type self-signed'
+        '#{Config::CACHE.app_name} cert-gen --cert-type self-signed --domain DOMAIN'
       DESC
       c.slop.string '--cert-type', 'Select the certificate type: lets-encrypt|self-signed'
       c.slop.string '--domain', 'The domain associated with the certificate'
