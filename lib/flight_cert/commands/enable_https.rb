@@ -29,20 +29,21 @@ module FlightCert
   module Commands
     class EnableHttps < Command
       def run
-        # Ensures the SSL cert has been generated before enabling https
-        unless File.exists?(Config::CACHE.ssl_fullchain) && File.exists?(Config::CACHE.ssl_privkey)
+        unless ssl_certs_exist?
           raise GeneralError, <<~ERROR.chomp
             In order to enable HTTPs a set of SSL certificates need to be generated.
             Please run the following to generate the certificates with Let's Encrypt:
-            #{Paint["#{Config::CACHE.app_name} cert-gen --cert-type lets-encrypt --domain DOMAIN --email EMAIL", :yellow]}
+            #{Paint["#{FlightCert.config.program_name} cert-gen --cert-type lets-encrypt --domain DOMAIN --email EMAIL", :yellow]}
           ERROR
         end
 
-        # Do not attempt to re-enable https
-        raise GeneralError, 'The HTTPs server is already enabled' if Config::CACHE.https_enabled?
+        if FlightCert.config.https_enabled?
+          raise GeneralError, 'The HTTPs server is already enabled'
+        end
 
-        # Ensure no data is overridden by a link, in practice this shouldn't happen
-        Config::CACHE.https_enable_paths.each do |path|
+        # Ensure no data is going to be overridden.  We want to enable HTTPS
+        # only by managing symlinks.
+        FlightCert.config.https_enable_paths.each do |path|
           if File.exists?(path) && !File.symlink?(path)
             raise InternalError, <<~ERROR.chomp
               Cowardly refusing to enable HTTPS as the following file already exists:
@@ -50,25 +51,28 @@ module FlightCert
             ERROR
           end
         end
-
-        # Generate all the links to the disabled paths
-        Config::CACHE.https_enable_paths.each do |path|
+        FlightCert.config.https_enable_paths.each do |path|
           FileUtils.ln_sf "#{path}.disabled", path
         end
 
-        # Attempts to restart the server
-        _, _, status = Config::CACHE.run_restart_command
+        _, _, status = FlightCert.run_restart_command
         if status.success?
           puts 'HTTPs has been enabled'
         else
           raise GeneralError, <<~ERROR.chomp
             HTTPs has been enabled but the web server failed to restart!
             HTTPs maybe disabled again with:
-            #{Paint["#{Config::CACHE.app_name} disable-https", :yellow]}
+          #{Paint["#{FlightCert.config.program_name} disable-https", :yellow]}
           ERROR
         end
+      end
+
+      private
+
+      def ssl_certs_exist?
+        File.exists?(FlightCert.config.ssl_fullchain) &&
+          File.exists?(FlightCert.config.ssl_privkey)
       end
     end
   end
 end
-

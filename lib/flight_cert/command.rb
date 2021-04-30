@@ -38,17 +38,17 @@ module FlightCert
     end
 
     def run!
-      Config::CACHE.logger.info "Running: #{self.class}"
+      FlightCert.logger.info "Running: #{self.class}"
       run
-      Config::CACHE.logger.info 'Exited: 0'
+      FlightCert.logger.info 'Exited: 0'
     rescue => e
       if e.respond_to? :exit_code
-        Config::CACHE.logger.fatal "Exited: #{e.exit_code}"
+        FlightCert.logger.fatal "Exited: #{e.exit_code}"
       else
-        Config::CACHE.logger.fatal 'Exited non-zero'
+        FlightCert.logger.fatal 'Exited non-zero'
       end
-      Config::CACHE.logger.debug e.backtrace.reverse.join("\n")
-      Config::CACHE.logger.error "(#{e.class}) #{e.message}"
+      FlightCert.logger.debug e.backtrace.reverse.join("\n")
+      FlightCert.logger.error "(#{e.class}) #{e.message}"
       raise e
     end
 

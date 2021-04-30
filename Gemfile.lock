@@ -1,3 +1,10 @@
+GIT
+  remote: https://github.com/openflighthpc/flight_configuration.git
+  revision: 85905e36d2db793587bf10b17734a36b6e9197f2
+  branch: 85905e36d2db793587bf10b17734a36b6e9197f2
+  specs:
+    flight_configuration (0.1.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -24,10 +31,11 @@ PLATFORMS
 
 DEPENDENCIES
   commander-openflighthpc (> 2.0.0)
+  flight_configuration!
   hashie
   paint
   pry
   pry-byebug
 
 BUNDLED WITH
-   2.1.2
+   2.1.4

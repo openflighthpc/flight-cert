@@ -1,0 +1,180 @@
+#==============================================================================
+# Copyright (C) 2021-present Alces Flight Ltd.
+#
+# This file is part of FlightCert.
+#
+# This program and the accompanying materials are made available under
+# the terms of the Eclipse Public License 2.0 which is available at
+# <https://www.eclipse.org/legal/epl-2.0>, or alternative license
+# terms made available by Alces Flight Ltd - please direct inquiries
+# about licensing to licensing@alces-flight.com.
+#
+# FlightCert is distributed in the hope that it will be useful, but
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, EITHER EXPRESS OR
+# IMPLIED INCLUDING, WITHOUT LIMITATION, ANY WARRANTIES OR CONDITIONS
+# OF TITLE, NON-INFRINGEMENT, MERCHANTABILITY OR FITNESS FOR A
+# PARTICULAR PURPOSE. See the Eclipse Public License 2.0 for more
+# details.
+#
+# You should have received a copy of the Eclipse Public License 2.0
+# along with FlightCert. If not, see:
+#
+#  https://opensource.org/licenses/EPL-2.0
+#
+# For more information on FlightCert, please visit:
+# https://github.com/openflighthpc/flight-cert
+#==============================================================================
+
+# ==============================================================================
+# Program Configurations
+# Configures various components of the CLI
+# ==============================================================================
+# program_name: bin/cert
+# program_application: 'Flight WWW'
+# program_description: 'Manage the HTTPs server and SSL certificates'
+
+# ==============================================================================
+# Certificate Type
+# Specify whether a "lets_encrypt" or "self_signed" certificate should be used.
+#
+# It is recommended that snake_case is used for the values, but other cases are
+# accepted. This includes:
+# snake_case, kebab-case, CamalCase, UPPER_SNAKE (+ others)
+# ==============================================================================
+# cert_type: 'lets_encrypt'
+
+# ==============================================================================
+# Email
+# Stores the email address that all newly generated certificates will be
+# associated with.
+#
+# The email is required for lets-encrypt certificates but optional for
+# self-signed.
+# ==============================================================================
+# email:
+
+# ==============================================================================
+# Domain
+# Stores the domain all newly generated certificates will be associated with.
+# ==============================================================================
+# domain:
+
+# ==============================================================================
+# Self Signed Directory
+# Define the directory to where self signed certificates will be stored. This
+# path should not be used by the external web service.
+#
+# Relative paths are expanded from the install directory.
+# ==============================================================================
+# selfsigned_dir: self-signed
+
+# ==============================================================================
+# SSL Fullchain Certificate and Private Key
+# Define the path to the target SSL fullchain  and private key files. The
+# application will symlink the relevant files to these locations. The external
+# web service should use these symlink files.
+#
+# Relative paths are expanded from the install directory.
+# ==============================================================================
+# ssl_fullchain: ssl/fullchain.pem
+# ssl_privkey: ssl/privkey.pem
+
+# ==============================================================================
+# Lets Encrypt Live Directory
+# Define where LetsEncrypt stores its live certificates.
+#
+# Relative paths are expanded from the install directory.
+# ==============================================================================
+# letsencrypt_live_dir: /etc/letsencrypt/live
+
+# ==============================================================================
+# Certbot "Binary" and Flags
+# XXX What are these "internal security reasons?
+# Define the path to the certbot bin file. For internal security reasons,
+# certbot binary file must be an absolute path.
+#
+# The "certbot plugin flags" are any additional options to certbot's certonly
+# command. The --domain DOMAIN, --email EMAIL, --n, --agree-tos flags will be
+# automatically set by the application. However additional flags maybe required
+# depending on your system's configuration.
+# ==============================================================================
+# certbot_bin: /usr/local/bin/certbot
+# certbot_plugin_flags: --nginx
+
+# ==============================================================================
+# Cron Path and Script
+# Define the path to and the content of the auto-renewal cron scirpt. Ultimately
+# it needs to run 'bin/cert cert-gen' in some form without any arguments.
+#
+# However due to the idiosyncrasies of ruby's versioning, the content of the
+# script will be platform/distribution specific. As such no default has been
+# given for 'cron_scirpt'. It will need to be manually set in the config before
+# auto renewals are possible.
+#
+# The cron path must be absolute.
+# ==============================================================================
+# cron_path: /etc/cron.daily/flight-cert
+# cron_script: 
+
+# ==============================================================================
+# HTTPS Enabled Paths
+# Specify a list of files required by the HTTPs which are normally disabled.
+# The following assumptions must be valid for this application to function:
+# * All the paths form a "path pair" of enabled and disabled files,
+# * All paths must be absolute,
+# * The HTTPs server is only considered running if all the enabled files exist,
+# * This config provides a list of "enable paths",
+# * A "disable path" matches its corresponding "enable path" with an
+#   additional '.disabled' file extension, and
+# * All the disabled files exist.
+#
+# The `enable-https` will generate symlinks from the enable paths to their
+# corresponding disabled path. The `disable-https` method will remove all these
+# symlinks.
+#
+# This service can not generate the content of the disabled files. They must
+# exist before using this application. Failure to ensure the disabled files
+# exist risks the generation of dangling symlinks.
+# ==============================================================================
+# https_enable_paths: []
+
+# ==============================================================================
+# Service Status Command
+# Define the system command which will check if the external web service is
+# running. It must exit 0 if and only if the service is running.
+#
+# This config must be set in order for LetsEncrypt to operate correctly
+# ==============================================================================
+# status_command: 'echo No Status Command!; exit 1'
+
+# ==============================================================================
+# Service Restart Command
+# Define the system command which will restart the external web service. It
+# must exit 0 if and only if the service restarted correctly.
+#
+# This config must be set for most operation to function correctly
+# ==============================================================================
+# restart_command: 'echo No Restart Command!; exit 1'
+
+# ==============================================================================
+# Start Service Command
+# An optional command to include in the error message on how to start the web
+# server. It is not executed by the tool
+# ==============================================================================
+# start_command_prompt: 
+
+# ==============================================================================
+# Log Path
+# The file the logger will write to. It will write to standard error if
+# omitted.
+#
+# Relative paths are expanded from the install directory.
+# ==============================================================================
+# log_path: ../var/log/flight-cert.log
+
+# ==============================================================================
+# Log level
+# Set at which severity the application will log
+# Valid levels: 'disabled', 'fatal', 'error', 'warn', 'info', 'debug'
+# ==============================================================================
+# log_level: error

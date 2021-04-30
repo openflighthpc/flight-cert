@@ -25,8 +25,6 @@
 # https://github.com/openflighthpc/flight-cert
 #==============================================================================
 
-require_relative 'command'
-
 module FlightCert
   module Commands
     def self.constantize(sym)
@@ -37,7 +35,7 @@ module FlightCert
       const = constantize(s)
       self.const_get(const).new(*args, **opts)
     rescue NameError
-      Config::CACHE.logger.fatal "Command class not defined: #{self}::#{const}"
+      FlightCert.logger.fatal "Command class not defined: #{self}::#{const}"
       raise InternalError, 'Command Not Found!'
     end
 
