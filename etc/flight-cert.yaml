@@ -89,9 +89,7 @@
 
 # ==============================================================================
 # Certbot "Binary" and Flags
-# XXX What are these "internal security reasons?
-# Define the path to the certbot bin file. For internal security reasons,
-# certbot binary file must be an absolute path.
+# Define the path to the certbot bin file.
 #
 # The "certbot plugin flags" are any additional options to certbot's certonly
 # command. The --domain DOMAIN, --email EMAIL, --n, --agree-tos flags will be
@@ -170,7 +168,7 @@
 #
 # Relative paths are expanded from the install directory.
 # ==============================================================================
-# log_path: ../var/log/flight-cert.log
+# log_path: var/log/flight-cert.log
 
 # ==============================================================================
 # Log level

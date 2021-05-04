@@ -31,8 +31,9 @@ require 'open3'
 require_relative 'flight_cert/configuration'
 
 module FlightCert
-  autoload(:Commands, 'flight_cert/commands')
   autoload(:Command, 'flight_cert/command')
+  autoload(:Commands, 'flight_cert/commands')
+  autoload(:VERSION, 'flight_cert/version')
 
   class << self
     def config

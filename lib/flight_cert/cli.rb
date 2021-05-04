@@ -25,8 +25,6 @@
 # https://github.com/openflighthpc/flight-cert
 #==============================================================================
 
-require_relative 'version'
-
 require 'commander'
 
 module FlightCert
