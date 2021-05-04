@@ -37,7 +37,7 @@ module FlightCert
           ERROR
         end
 
-        if FlightCert.config.https_enabled?
+        if FlightCert.https_enabled?
           raise GeneralError, 'The HTTPs server is already enabled'
         end
 

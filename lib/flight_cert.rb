@@ -76,6 +76,21 @@ module FlightCert
       run_command(:status_command)
     end
 
+    ##
+    # Checks if all the enable https paths have been symlinked
+    def https_enabled?
+      config.https_enable_paths.all? { |p| File.symlink?(p) }
+    end
+
+    ##
+    # Checks if the https server is fully disabled
+    # NOTE: This is not the logical opposite of https_enable? due to the
+    # technical possibility of a mixed state. However this in practice
+    # shouldn't occur.
+    def https_disabled?
+      !config.https_enable_paths.any? { |p| File.symlink?(p) }
+    end
+
     private
 
     def run_command(command_name)

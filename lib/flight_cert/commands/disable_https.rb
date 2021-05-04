@@ -29,7 +29,7 @@ module FlightCert
   module Commands
     class DisableHttps < Command
       def run
-        if FlightCert.config.https_disabled?
+        if FlightCert.https_disabled?
           raise GeneralError, 'The HTTPs server is already disabled'
         end
 

@@ -43,7 +43,7 @@ module FlightCert
         link_certificates
 
         # Attempts to restart the service
-        if FlightCert.config.https_enabled?
+        if FlightCert.https_enabled?
           unless FlightCert.run_restart_command
             raise GeneralError, <<~ERROR.chomp
               Failed to restart the web server with the new certificate!

@@ -95,21 +95,6 @@ module FlightCert
     attribute :log_level, default: 'error'
     attribute :development, default: false, required: false
 
-    ##
-    # Checks if all the enable https paths have been symlinked
-    def https_enabled?
-      https_enable_paths.all? { |p| File.symlink?(p) }
-    end
-
-    ##
-    # Checks if the https server is fully disabled
-    # NOTE: This is not the logical opposite of https_enable? due to the
-    # technical possibility of a mixed state. However this in practice
-    # shouldn't occur.
-    def https_disabled?
-      !https_enable_paths.any? { |p| File.symlink?(p) }
-    end
-
     def selfsigned_privkey
       File.join(selfsigned_dir, 'privkey.pem')
     end
