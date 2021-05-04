@@ -14,7 +14,6 @@ GEM
       highline (> 1.7.2)
       paint (~> 2.1.0)
       slop (~> 4.8)
-    hashie (4.1.0)
     highline (2.0.3)
     method_source (1.0.0)
     paint (2.1.1)
@@ -32,7 +31,6 @@ PLATFORMS
 DEPENDENCIES
   commander-openflighthpc (> 2.0.0)
   flight_configuration!
-  hashie
   paint
   pry
   pry-byebug
