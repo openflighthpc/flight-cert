@@ -26,6 +26,7 @@
 # https://github.com/openflighthpc/flight-cert
 #==============================================================================
 require 'logger'
+require 'open3'
 
 require_relative 'flight_cert/configuration'
 
@@ -78,16 +79,21 @@ module FlightCert
 
     def run_command(command_name)
       cmd = config.send(command_name)
+      if cmd.nil? || cmd.empty?
+        logger.info "Command #{command_name.inspect} not set"
+        return false
+      end
+
       logger.info "Running #{command_name.inspect}: (#{cmd.inspect})"
-      results = nil
+      status = nil
       Bundler.with_unbundled_env do
-        results = Open3.capture3(cmd).tap do |r|
+        _, _, status = Open3.capture3(cmd).tap do |r|
           logger.info "Exited: #{r.last.exitstatus}"
           logger.debug "STDOUT: #{r[0]}"
           logger.debug "STDERR: #{r[1]}"
         end
       end
-      results
+      status.success?
     end
   end
 end

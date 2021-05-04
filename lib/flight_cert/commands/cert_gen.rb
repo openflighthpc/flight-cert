@@ -44,8 +44,7 @@ module FlightCert
 
         # Attempts to restart the service
         if FlightCert.config.https_enabled?
-          _, _, status = FlightCert.run_restart_command
-          unless status.success?
+          unless FlightCert.run_restart_command
             raise GeneralError, <<~ERROR.chomp
               Failed to restart the web server with the new certificate!
             ERROR
@@ -124,8 +123,7 @@ module FlightCert
       # Generates a lets encrypt certificate
       def generate_letsencrypt
         # Checks if the external service is running
-        _, _, status = FlightCert.run_status_command
-        unless status.success?
+        unless FlightCert.run_status_command
           msg = "The external web service does not appear to be running!"
           if FlightCert.config.start_command_prompt
             msg += "\nPlease start it with:\n#{Paint[FlightCert.config.start_command_prompt, :yellow]}"

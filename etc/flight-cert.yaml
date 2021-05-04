@@ -145,7 +145,7 @@
 #
 # This config must be set in order for LetsEncrypt to operate correctly
 # ==============================================================================
-# status_command: 'echo No Status Command!; exit 1'
+# status_command:
 
 # ==============================================================================
 # Service Restart Command
@@ -154,7 +154,7 @@
 #
 # This config must be set for most operation to function correctly
 # ==============================================================================
-# restart_command: 'echo No Restart Command!; exit 1'
+# restart_command:
 
 # ==============================================================================
 # Start Service Command

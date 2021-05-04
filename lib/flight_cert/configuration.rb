@@ -77,8 +77,8 @@ module FlightCert
 
     attribute :https_enable_paths, default: []
 
-    attribute :status_command, default: 'echo No Status Command!; exit 1'
-    attribute :restart_command, default: 'echo No Restart Command!; exit 1'
+    attribute :status_command, required: false
+    attribute :restart_command, required: false
     attribute :start_command_prompt, required: false
 
     attribute :log_path, required: false,

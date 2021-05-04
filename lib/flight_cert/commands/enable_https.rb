@@ -55,8 +55,7 @@ module FlightCert
           FileUtils.ln_sf "#{path}.disabled", path
         end
 
-        _, _, status = FlightCert.run_restart_command
-        if status.success?
+        if FlightCert.run_restart_command
           puts 'HTTPs has been enabled'
         else
           raise GeneralError, <<~ERROR.chomp

@@ -45,8 +45,7 @@ module FlightCert
         end
         FlightCert.config.https_enable_paths.each { |p| FileUtils.rm_f p }
 
-        _, _, status = FlightCert.run_restart_command
-        if status.success?
+        if FlightCert.run_restart_command
           puts 'HTTPs has been disabled'
         else
           raise GeneralError, <<~ERROR.chomp
