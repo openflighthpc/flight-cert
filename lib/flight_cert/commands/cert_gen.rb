@@ -37,6 +37,11 @@ module FlightCert
         ensure_letsencrypt_has_an_email
         FlightCert.config.save_email_and_domain
 
+        if options.config_only
+          puts "Configuration updated. Skipping certificate generation."
+          return
+        end
+
         # Generate the certificates
         FlightCert.config.letsencrypt? ? generate_letsencrypt : generate_selfsigned
 
