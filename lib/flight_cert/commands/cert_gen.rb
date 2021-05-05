@@ -35,7 +35,7 @@ module FlightCert
         process_options
         ensure_domain_is_set
         ensure_letsencrypt_has_an_email
-        FlightCert.config.save_email_and_domain
+        FlightCert.config.save_local_configuration
 
         if options.config_only
           puts "Configuration updated. Skipping certificate generation."

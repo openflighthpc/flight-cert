@@ -135,12 +135,14 @@ module FlightCert
       end
     end
 
-    # The configuration for the email and domain can be provided interactively
-    # when generating a certificate.  Any such values are saved separately
-    # from the main configuration.
-    def save_email_and_domain
+    # The configuration for the certificate type, email and domain can be
+    # provided interactively when generating a certificate.  Any such values
+    # are saved separately from the main configuration.
+    def save_local_configuration
       local_config = from_config_file(LOCAL_CONFIG_FILE)
-      new_local_config = local_config.merge('email' => email, 'domain' => domain)
+      new_local_config = local_config.merge(
+        'email' => email, 'domain' => domain, 'cert_type' => cert_type
+      )
       File.write LOCAL_CONFIG_FILE, YAML.dump(new_local_config)
     end
 
