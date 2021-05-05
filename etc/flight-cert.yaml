@@ -1,6 +1,5 @@
-# vim: set filetype=ruby:
 #==============================================================================
-# Copyright (C) 2020-present Alces Flight Ltd.
+# Copyright (C) 2021-present Alces Flight Ltd.
 #
 # This file is part of FlightCert.
 #
@@ -30,11 +29,9 @@
 # Program Configurations
 # Configures various components of the CLI
 # ==============================================================================
-#<% if program -%><%= program %><% else -%>
-config :program_name,         default: 'bin/cert'
-config :program_application,  default: 'Flight WWW'
-config :program_description,  default: 'Manage the HTTPs server and SSL certificates'
-#<% end -%>
+# program_name: bin/cert
+# program_application: 'Flight WWW'
+# program_description: 'Manage the HTTPs server and SSL certificates'
 
 # ==============================================================================
 # Certificate Type
@@ -44,34 +41,32 @@ config :program_description,  default: 'Manage the HTTPs server and SSL certific
 # accepted. This includes:
 # snake_case, kebab-case, CamalCase, UPPER_SNAKE (+ others)
 # ==============================================================================
-config :cert_type, default: 'lets_encrypt'
+# cert_type: 'lets_encrypt'
 
 # ==============================================================================
 # Email
 # Stores the email address that all newly generated certificates will be
-# associated with
+# associated with.
 #
 # The email is required for lets-encrypt certificates but optional for
-# self-signed
+# self-signed.
 # ==============================================================================
-config :email, required: false
+# email:
 
 # ==============================================================================
 # Domain
 # Stores the domain all newly generated certificates will be associated with.
 # ==============================================================================
-config :domain, required: false
+# domain:
 
 # ==============================================================================
 # Self Signed Directory
 # Define the directory to where self signed certificates will be stored. This
 # path should not be used by the external web service.
 #
-# It must be an absolute path.
+# Relative paths are expanded from the install directory.
 # ==============================================================================
-#<% if selfsigned_dir -%><%= selfsigned_dir %><% else -%>
-config :selfsigned_dir, default: File.expand_path('self-signed', __dir__)
-#<% end -%>
+# selfsigned_dir: self-signed
 
 # ==============================================================================
 # SSL Fullchain Certificate and Private Key
@@ -79,37 +74,30 @@ config :selfsigned_dir, default: File.expand_path('self-signed', __dir__)
 # application will symlink the relevant files to these locations. The external
 # web service should use these symlink files.
 #
-# They must be absolute paths.
+# Relative paths are expanded from the install directory.
 # ==============================================================================
-#<% if ssl_paths -%><%= ssl_paths %><% else -%>
-config :ssl_fullchain,  default: File.expand_path('ssl/fullchain.pem', __dir__)
-config :ssl_privkey,    default: File.expand_path('ssl/privkey.pem', __dir__)
-#<% end -%>
+# ssl_fullchain: ssl/fullchain.pem
+# ssl_privkey: ssl/privkey.pem
 
 # ==============================================================================
 # Lets Encrypt Live Directory
 # Define where LetsEncrypt stores its live certificates.
 #
-# It must be an absolute path.
+# Relative paths are expanded from the install directory.
 # ==============================================================================
-#<% if letsencrypt_live_dir -%><%= letsencrypt_live_dir %><% else -%>
-config :letsencrypt_live_dir, default: '/etc/letsencrypt/live'
-#<% end -%>
+# letsencrypt_live_dir: /etc/letsencrypt/live
 
 # ==============================================================================
 # Certbot "Binary" and Flags
-# Define the path to the certbot bin file. For internal security reasons,
-# certbot binary file must be an absolute path.
+# Define the path to the certbot bin file.
 #
 # The "certbot plugin flags" are any additional options to certbot's certonly
 # command. The --domain DOMAIN, --email EMAIL, --n, --agree-tos flags will be
 # automatically set by the application. However additional flags maybe required
 # depending on your system's configuration.
 # ==============================================================================
-#<% if certbot -%><%= certbot %><% else -%>
-config :certbot_bin, default: '/usr/local/bin/certbot'
-config :certbot_plugin_flags, default: '--nginx'
-#<% end -%>
+# certbot_bin: /usr/local/bin/certbot
+# certbot_plugin_flags: --nginx
 
 # ==============================================================================
 # Cron Path and Script
@@ -123,10 +111,8 @@ config :certbot_plugin_flags, default: '--nginx'
 #
 # The cron path must be absolute.
 # ==============================================================================
-#<% if cron -%><%= cron %><% else -%>
-config :cron_path, default: '/etc/cron.daily/flight-cert'
-config :cron_script
-#<% end -%>
+# cron_path: /etc/cron.daily/flight-cert
+# cron_script: 
 
 # ==============================================================================
 # HTTPS Enabled Paths
@@ -148,9 +134,7 @@ config :cron_script
 # exist before using this application. Failure to ensure the disabled files
 # exist risks the generation of dangling symlinks.
 # ==============================================================================
-#<% if https_enable_paths -%><%= https_enable_paths %><% else -%>
-config :https_enable_paths, default: []
-#<% end -%>
+# https_enable_paths: []
 
 # ==============================================================================
 # Service Status Command
@@ -159,9 +143,7 @@ config :https_enable_paths, default: []
 #
 # This config must be set in order for LetsEncrypt to operate correctly
 # ==============================================================================
-#<% if status_command -%><%= status_command %><% else -%>
-config :status_command, default: 'echo No Status Command!; exit 1'
-#<% end -%>
+# status_command:
 
 # ==============================================================================
 # Service Restart Command
@@ -170,33 +152,27 @@ config :status_command, default: 'echo No Status Command!; exit 1'
 #
 # This config must be set for most operation to function correctly
 # ==============================================================================
-#<% if restart_command -%><%= restart_command %><% else -%>
-config :restart_command, default: 'echo No Restart Command!; exit 1'
-#<% end -%>
+# restart_command:
 
 # ==============================================================================
 # Start Service Command
 # An optional command to include in the error message on how to start the web
 # server. It is not executed by the tool
 # ==============================================================================
-#<% if start_command_prompt -%><%= start_command_prompt %><% else -%>
-config :start_command_prompt
-#<% end -%>
+# start_command_prompt: 
 
 # ==============================================================================
 # Log Path
-# The file the logger will write to. It will write to standard error when set
-# to nil.
+# The file the logger will write to. It will write to standard error if
+# omitted.
 #
-# It may be:
-#  * An absolute path, or
-#  * Nil to print to standard error
-#
+# Relative paths are expanded from the install directory.
+# ==============================================================================
+# log_path: var/log/flight-cert.log
+
+# ==============================================================================
 # Log level
 # Set at which severity the application will log
 # Valid levels: 'disabled', 'fatal', 'error', 'warn', 'info', 'debug'
 # ==============================================================================
-#<% if log_path -%><%= log_path %><% else -%>
-config :log_path, required: false, default: File.expand_path('../var/log/flight-cert.log', __dir__)
-#<% end -%>
-config :log_level, default: 'error'
+# log_level: error

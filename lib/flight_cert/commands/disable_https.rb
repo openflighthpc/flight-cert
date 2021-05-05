@@ -29,11 +29,13 @@ module FlightCert
   module Commands
     class DisableHttps < Command
       def run
-        # Do not attempt to re-disable https
-        raise GeneralError, 'The HTTPs server is already disabled' if Config::CACHE.https_disabled?
+        if FlightCert.https_disabled?
+          raise GeneralError, 'The HTTPs server is already disabled'
+        end
 
-        # Ensures no actual files are deleted! In practice this error shouldn't occur
-        Config::CACHE.https_enable_paths.each do |path|
+        # Make sure we don't delete actual files; only symlinks.  In practice,
+        # this error shouldn't occur.
+        FlightCert.config.https_enable_paths.each do |path|
           if File.exists?(path) && !File.symlink?(path)
             raise InternalError, <<~ERROR.chomp
               Cowardly refusing to disable HTTPS as the following file is not linked correctly:
@@ -41,13 +43,9 @@ module FlightCert
             ERROR
           end
         end
+        FlightCert.config.https_enable_paths.each { |p| FileUtils.rm_f p }
 
-        # Deletes all the symlinks
-        Config::CACHE.https_enable_paths.each { |p| FileUtils.rm_f p }
-
-        # Attempts to restart the server
-        _, _, status = Config::CACHE.run_restart_command
-        if status.success?
+        if FlightCert.run_restart_command
           puts 'HTTPs has been disabled'
         else
           raise GeneralError, <<~ERROR.chomp
@@ -58,4 +56,3 @@ module FlightCert
     end
   end
 end
-

@@ -33,29 +33,33 @@ begin
   require 'bundler'
   Bundler.setup(:default)
 
-  # Enables the development mode
-  require_relative '../lib/flight_cert/config'
-  if FlightCert::Config::CACHE.development?
+  # Add lib to LOAD_PATH so that autoloads defined in FlightCert work.
+  lib = File.expand_path('../lib', __dir__)
+  $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+  require_relative '../lib/flight_cert'
+  FlightCert.load_configuration
+
+  if FlightCert.config.development
     begin
-        Bundler.setup(:default, :development)
-        require 'pry'
-        require 'pry-byebug'
+      Bundler.setup(:default, :development)
+      require 'pry'
+      require 'pry-byebug'
     rescue StandardError, LoadError
       Bundler.setup(:default)
       $stderr.puts "An error occurred when enabling development mode!"
     end
   end
 
-  # Run the CLI
   require_relative '../lib/flight_cert/cli'
-  Dir.chdir(ENV.fetch('FLIGHT_CWD','.'))
-  OpenFlight.set_standard_env rescue nil
-  FlightCert::CLI.run!(*ARGV)
+  Dir.chdir(ENV.fetch('FLIGHT_CWD','.')) do
+    OpenFlight.set_standard_env rescue nil
+    FlightCert::CLI.run!(*ARGV)
+  end
 rescue Interrupt
   if Kernel.const_defined?(:Paint)
-    $stderr.puts "\n#{Paint['WARNING', :underline, :yellow]}: Cancelled by user"
+    $stderr.print "\n#{Paint['WARNING', :underline, :yellow]}: Cancelled by user"
   else
-    $stderr.puts "\nWARNING: Cancelled by user"
+    $stderr.print "\nWARNING: Cancelled by user"
   end
-  exit(130)
+  raise SignalException.new(2)
 end

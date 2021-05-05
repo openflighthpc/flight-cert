@@ -1,7 +1,7 @@
 *~
+*.orig
 tmp
 .bundle
 vendor
 var
-etc
-!etc/config.reference
+etc/flight-cert.local.yaml

@@ -29,8 +29,8 @@ module FlightCert
   module Commands
     class CronRenewal < Command
       def run
-        if options.disable && File.exists?(Config::CACHE.cron_path)
-          FileUtils.rm Config::CACHE.cron_path
+        if options.disable && File.exists?(FlightCert.config.cron_path)
+          FileUtils.rm FlightCert.config.cron_path
           puts <<~INFO.chomp
             Automatic renewal has been disabled
           INFO
@@ -38,18 +38,18 @@ module FlightCert
           raise InputError, <<~WARN.chomp
             Automatic renewal is already disabled!
           WARN
-        elsif Config::CACHE.selfsigned?
+        elsif FlightCert.config.selfsigned?
            raise SystemError, <<~ERROR.chomp
             Automatic renewal is not support for self-signed certificates!
           ERROR
           exit 1
-        elsif File.exists? Config::CACHE.cron_path
+        elsif File.exists? FlightCert.config.cron_path
           raise InputError, <<~WARN.chomp
             Automatic renewal is already enabled! It can be disabled with:
-            #{Paint["#{Config::CACHE.app_name} cron-renewal --disable", :yellow]}
+            #{Paint["#{FlightCert.config.program_name} cron-renewal --disable", :yellow]}
           WARN
-        elsif Config::CACHE.cron_script
-          File.write Config::CACHE.cron_path, Config::CACHE.cron_script
+        elsif FlightCert.config.cron_script
+          File.write FlightCert.config.cron_path, FlightCert.config.cron_script
           puts <<~INFO.chomp
             Automatic renewal has been enabled
           INFO

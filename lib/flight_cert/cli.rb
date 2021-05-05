@@ -25,25 +25,15 @@
 # https://github.com/openflighthpc/flight-cert
 #==============================================================================
 
-require_relative 'commands'
-require_relative 'version'
-require_relative 'config'
-
 require 'commander'
 
 module FlightCert
   module CLI
     extend Commander::CLI
 
-    # Configures the CLI from the config
-    regex = /(?<=\Aprogram_).*\Z/
-    Config.properties.each do |prop|
-      if match = regex.match(prop.to_s)
-        sym = match[0].to_sym
-        program sym, Config::CACHE[prop]
-      end
-    end
-
+    program :name, FlightCert.config.program_name
+    program :application, FlightCert.config.program_application
+    program :description, FlightCert.config.program_description
     program :version, "v#{FlightCert::VERSION}"
     program :help_paging, false
     default_command :help
@@ -69,7 +59,7 @@ module FlightCert
       c.summary = 'Generate and renew SSL certificates'
       c.description = <<~DESC.chomp
         By default the HTTPS server is disabled as it requires an SSL certificate.
-        The '#{Config::CACHE.app_name}' utilities support the generation of Let's Encrypt and
+        The '#{FlightCert.config.program_name}' utilities support the generation of Let's Encrypt and
         self-signed certificates.  We recommended that a Let's Encrypt certificate
         is generated where possible.
 
@@ -79,12 +69,12 @@ module FlightCert
         challenge.  Once ready, A Let's Encrypt certificate can be generated with
         the following command:
 
-        '#{Config::CACHE.app_name} cert-gen --cert-type lets-encrypt --domain DOMAIN --email EMAIL'
+        '#{FlightCert.config.program_name} cert-gen --cert-type lets-encrypt --domain DOMAIN --email EMAIL'
 
         Alternatively, a self-signed SSL certificate valid for 10 years can be
         generated, by running the following command:
 
-        '#{Config::CACHE.app_name} cert-gen --cert-type self-signed'
+        '#{FlightCert.config.program_name} cert-gen --cert-type self-signed --domain DOMAIN'
       DESC
       c.slop.string '--cert-type', 'Select the certificate type: lets-encrypt|self-signed'
       c.slop.string '--domain', 'The domain associated with the certificate'
@@ -97,7 +87,7 @@ module FlightCert
       c.description = <<~DESC.chomp
         A Let's Encrypt certificate will need to be periodically renewed.  You
         can enable automatic renewal of Let's Encrypt certificates by running:
-        '#{Config::CACHE.app_name} cron-renewal'
+        '#{FlightCert.config.program_name} cron-renewal'
 
         Self-signed certificates are valid for 10 years and automatic renewal is not
         supported.
@@ -120,7 +110,7 @@ module FlightCert
       DESC
     end
 
-    if Config::CACHE.development?
+    if FlightCert.config.development
       create_command 'console' do |c|
         c.action do
           FlightCert::Command.new([], {}).instance_exec { binding.pry }

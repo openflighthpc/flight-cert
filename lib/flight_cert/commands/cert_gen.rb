@@ -35,18 +35,21 @@ module FlightCert
         process_options
         ensure_domain_is_set
         ensure_letsencrypt_has_an_email
-        Config::CACHE.save
+        FlightCert.config.save_local_configuration
+
+        if options.config_only
+          puts "Configuration updated. Skipping certificate generation."
+          return
+        end
 
         # Generate the certificates
-        Config::CACHE.letsencrypt? ? generate_letsencrypt : generate_selfsigned
+        FlightCert.config.letsencrypt? ? generate_letsencrypt : generate_selfsigned
 
-        # Link the certificates into place
-        Config::CACHE.link_certificates
+        link_certificates
 
         # Attempts to restart the service
-        if Config::CACHE.https_enabled?
-          _, _, status = Config::CACHE.run_restart_command
-          unless status.success?
+        if FlightCert.https_enabled?
+          unless FlightCert.run_restart_command
             raise GeneralError, <<~ERROR.chomp
               Failed to restart the web server with the new certificate!
             ERROR
@@ -56,16 +59,19 @@ module FlightCert
         else
           $stderr.puts <<~WARN
             You can now enable the HTTPS server with:
-            #{Paint["#{Config::CACHE.app_name} enable-https", :yellow]}
+            #{Paint["#{FlightCert.config.program_name} enable-https", :yellow]}
           WARN
         end
       end
 
+      private
+
       ##
       # Updates the internal config with the new option flags
       def process_options
-        if options.cert_type && Config::ALL_TYPES.include?(options.cert_type)
-          Config::CACHE.cert_type = options.cert_type
+        all_cert_types = FlightCert::Configuration::ALL_CERT_TYPES
+        if options.cert_type && all_cert_types.include?(options.cert_type)
+          FlightCert.config.cert_type = options.cert_type
         elsif options.cert_type
           raise InputError, <<~ERROR.chomp
             Unrecognized certificate type: #{options.cert_type}
@@ -78,9 +84,9 @@ module FlightCert
           $stderr.puts <<~ERROR.chomp
             Clearing the email setting...
           ERROR
-          Config::CACHE.delete(:email)
+          FlightCert.config.email = nil
         elsif options.email
-          Config::CACHE.email = options.email
+          FlightCert.config.email = options.email
         end
 
         # Updates the domain field
@@ -88,29 +94,31 @@ module FlightCert
           $stderr.puts <<~ERROR.chomp
             Clearing the domain setting...
           ERROR
-          Config::CACHE.delete(:domain)
+          FlightCert.config.domain = nil
         elsif options.domain
-          Config::CACHE.domain  = options.domain
+          FlightCert.config.domain  = options.domain
         end
       end
 
       ##
       # Raises an error if the domain has not been set
       def ensure_domain_is_set
-        return if Config::CACHE.domain?
-        Config::CACHE.domain = `hostname --fqdn`.chomp
+        domain = FlightCert.config.domain
+        return if !(domain.nil? || domain.empty?)
+
         raise GeneralError, <<~ERROR.chomp
           A certificate can not be generated without a domain!
-          Possible try the following: #{Paint['--domain "$(hostname --fqdn)"', :yellow]}
+          Possibly try the following: #{Paint['--domain "$(hostname --fqdn)"', :yellow]}
         ERROR
       end
 
       ##
       # Errors if the email is unset for LetsEncrypt certificates
       def ensure_letsencrypt_has_an_email
-        return if Config::CACHE.email? || !Config::CACHE.letsencrypt?
+        email = FlightCert.config.email
+        return unless FlightCert.config.letsencrypt? && (email.nil? || email.empty?)
         puts <<~ERROR.chomp
-          A Let's Encrypt certificates can not be generated without an email!
+          A Let's Encrypt certificates cannot be generated without an email!
           Please provide the following flag: #{Paint['--email EMAIL', :yellow]}
         ERROR
         exit 1
@@ -120,28 +128,27 @@ module FlightCert
       # Generates a lets encrypt certificate
       def generate_letsencrypt
         # Checks if the external service is running
-        _, _, status = Config::CACHE.run_status_command
-        unless status.success?
+        unless FlightCert.run_status_command
           msg = "The external web service does not appear to be running!"
-          if Config::CACHE.start_command_prompt
-            msg += "\nPlease start it with:\n#{Paint[Config::CACHE.start_command_prompt, :yellow]}"
+          if FlightCert.config.start_command_prompt
+            msg += "\nPlease start it with:\n#{Paint[FlightCert.config.start_command_prompt, :yellow]}"
           end
           raise GeneralError, msg
         end
 
         puts "Generating a Let's Encrypt certificate, please wait..."
         cmd = [
-          Config::CACHE.certbot_bin,
+          FlightCert.config.certbot_bin,
           'certonly', '-n', '--agree-tos',
-          '--domain', Config::CACHE.domain,
-          '--email', Config::CACHE.email,
-          *Shellwords.shellsplit(Config::CACHE.certbot_plugin_flags)
+          '--domain', FlightCert.config.domain,
+          '--email', FlightCert.config.email,
+          *Shellwords.shellsplit(FlightCert.config.certbot_plugin_flags)
         ]
-        Config::CACHE.logger.info "Command (approx): #{cmd.join(' ')}"
+        FlightCert.logger.info "Command (approx): #{cmd.join(' ')}"
         out, err, status = Open3.capture3(*cmd)
-        Config::CACHE.logger.info "Exited: #{status.exitstatus}"
-        Config::CACHE.logger.debug "STDOUT: #{out}"
-        Config::CACHE.logger.debug "STDERR: #{err}"
+        FlightCert.logger.info "Exited: #{status.exitstatus}"
+        FlightCert.logger.debug "STDOUT: #{out}"
+        FlightCert.logger.debug "STDERR: #{err}"
         if status.success?
           puts 'Certificate generated.'
         else
@@ -157,11 +164,30 @@ module FlightCert
       # Generates a self signed certificate
       def generate_selfsigned
         puts "Generating a self-signed certificate with a 10 year expiry. Please wait..."
-        builder = SelfSignedBuilder.new(Config::CACHE.domain, Config::CACHE.email)
-        FileUtils.mkdir_p Config::CACHE.selfsigned_dir
-        File.write        Config::CACHE.selfsigned_fullchain, builder.to_fullchain
-        File.write        Config::CACHE.selfsigned_privkey,   builder.key.to_s
+        builder = SelfSignedBuilder.new(FlightCert.config.domain, FlightCert.config.email)
+        FileUtils.mkdir_p FlightCert.config.selfsigned_dir
+        File.write        FlightCert.config.selfsigned_fullchain, builder.to_fullchain
+        File.write        FlightCert.config.selfsigned_privkey,   builder.key.to_s
         puts 'Certificate generated.'
+      end
+
+      ##
+      # Symlinks the relevant certificate/private key into the SSL directory
+      def link_certificates
+        ssl_privkey = FlightCert.config.ssl_privkey
+        ssl_fullchain = FlightCert.config.ssl_fullchain
+
+        privkey = FlightCert.config.letsencrypt? ?
+          FlightCert.config.letsencrypt_privkey :
+          FlightCert.config.selfsigned_privkey
+        fullchain = FlightCert.config.letsencrypt? ?
+          FlightCert.config.letsencrypt_fullchain :
+          FlightCert.config.selfsigned_fullchain
+
+        FileUtils.mkdir_p File.dirname(ssl_privkey)
+        FileUtils.mkdir_p File.dirname(ssl_fullchain)
+        FileUtils.ln_sf privkey, ssl_privkey
+        FileUtils.ln_sf fullchain, ssl_fullchain
       end
     end
   end
