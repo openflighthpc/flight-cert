@@ -27,13 +27,15 @@
 #==============================================================================
 require 'logger'
 require 'open3'
-
-require_relative 'flight_cert/configuration'
+require 'active_support/string_inquirer'
+require 'active_support/core_ext/object/blank'
+require 'active_support/core_ext/module/delegation'
 
 module FlightCert
   autoload(:Command, 'flight_cert/command')
   autoload(:Commands, 'flight_cert/commands')
   autoload(:VERSION, 'flight_cert/version')
+  autoload(:Configuration, 'flight_cert/configuration')
 
   class << self
     def config
@@ -91,6 +93,21 @@ module FlightCert
       !config.https_enable_paths.any? { |p| File.symlink?(p) }
     end
 
+    def env
+      @env ||= ActiveSupport::StringInquirer.new(
+        ENV["flight_ENVIRONMENT"].presence || "production"
+      )
+    end
+
+    def root
+      @root ||=
+        if env.production? && ENV["flight_ROOT"].present?
+          File.expand_path(ENV["flight_ROOT"])
+        else
+          File.expand_path('..', __dir__)
+        end
+    end
+
     private
 
     def run_command(command_name)
@@ -111,5 +128,15 @@ module FlightCert
       end
       status.success?
     end
+  end
+end
+
+# Provides a common interface to details about this application.
+#
+# Similar in nature to the `Rails` object, it allows access to common objects
+# across the code base without having to use dependency injection everywhere.
+module Flight
+  class << self
+    delegate :config, :env, :logger, :root, to: FlightCert
   end
 end

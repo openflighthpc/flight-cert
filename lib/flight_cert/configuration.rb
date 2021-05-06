@@ -32,6 +32,43 @@ module FlightCert
   class Configuration
     extend FlightConfiguration::DSL
 
+    module FcdslExtensions
+      def application_name(name=nil)
+        @application_name ||= name
+        if @application_name.nil?
+          raise Error, 'The application_name has not been defined!'
+        end
+        @application_name
+      end
+
+      def root_path(*_)
+        super Flight.root
+      end
+
+      def config_files(*_)
+        @config_files ||= [
+          root_path.join("etc/#{application_name}.yaml"),
+          root_path.join("etc/#{application_name}.#{Flight.env}.yaml"),
+          root_path.join("etc/#{application_name}.local.yaml"),
+          root_path.join("etc/#{application_name}.#{Flight.env}.local.yaml"),
+        ]
+        super
+      end
+      alias_method :add_config_files, :config_files
+
+      def env_var_prefix(*_)
+        @env_var_prefix ||=
+          begin
+            parts = application_name.split(/[_-]/)
+            flight_part = (parts.first == 'flight' ? [parts.shift] : [])
+            parts.map!(&:upcase)
+            [*flight_part, *parts].join('_')
+          end
+        super
+      end
+    end
+    extend FcdslExtensions
+
     LETS_ENCRYPT_TYPES  = [
       :lets_encrypt, 'lets-encrypt', 'lets_encrypt', 'letsencrypt',
       'letsEncrypt', 'LetsEncrypt', 'LETS_ENCRYPT'
@@ -42,14 +79,7 @@ module FlightCert
     ]
     ALL_CERT_TYPES = [*LETS_ENCRYPT_TYPES, *SELF_SIGNED_TYPES]
 
-    root_path File.expand_path('../..', __dir__)
-
-    env_var_prefix 'flight_CERT'
-
-    LOCAL_CONFIG_FILE = File.expand_path('etc/flight-cert.local.yaml', root_path)
-    config_files File.expand_path('etc/flight-cert.yaml', root_path),
-                 File.expand_path('etc/flight-cert.development.yaml', root_path),
-                 LOCAL_CONFIG_FILE
+    application_name 'flight-cert'
 
     attribute :program_name, default: 'bin/cert'
     attribute :program_application, default: 'Flight WWW'
@@ -75,7 +105,10 @@ module FlightCert
     attribute :cron_path, default: '/etc/cron.daily/flight-cert'
     attribute :cron_script, required: false
 
-    attribute :https_enable_paths, default: []
+    attribute :https_enable_paths, default: [],
+      transform: ->(paths) do
+        paths.map {|p| relative_to(root_path).call(p)}
+      end
 
     attribute :status_command, required: false
     attribute :restart_command, required: false
@@ -139,14 +172,18 @@ module FlightCert
     # provided interactively when generating a certificate.  Any such values
     # are saved separately from the main configuration.
     def save_local_configuration
-      local_config = from_config_file(LOCAL_CONFIG_FILE)
+      local_config = from_config_file(local_config_file)
       new_local_config = local_config.merge(
         'email' => email, 'domain' => domain, 'cert_type' => cert_type
       )
-      File.write LOCAL_CONFIG_FILE, YAML.dump(new_local_config)
+      File.write local_config_file, YAML.dump(new_local_config)
     end
 
     private
+
+    def local_config_file
+      self.class.config_files.detect { |cf| cf.to_s.match?(/local.yaml$/) }
+    end
 
     def from_config_file(config_file)
       return {} unless File.exists?(config_file)
