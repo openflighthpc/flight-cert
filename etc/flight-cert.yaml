@@ -64,9 +64,9 @@
 # Define the directory to where self signed certificates will be stored. This
 # path should not be used by the external web service.
 #
-# Relative paths are expanded from the install directory.
+# Relative paths are expanded from flight_ROOT or the install directory.
 # ==============================================================================
-# selfsigned_dir: self-signed
+# selfsigned_dir: etc/www/self-signed
 
 # ==============================================================================
 # SSL Fullchain Certificate and Private Key
@@ -74,18 +74,18 @@
 # application will symlink the relevant files to these locations. The external
 # web service should use these symlink files.
 #
-# Relative paths are expanded from the install directory.
+# Relative paths are expanded from flight_ROOT or the install directory.
 # ==============================================================================
-# ssl_fullchain: ssl/fullchain.pem
-# ssl_privkey: ssl/privkey.pem
+# ssl_fullchain: etc/www/ssl/fullchain.pem
+# ssl_privkey: etc/www/ssl/privkey.pem
 
 # ==============================================================================
 # Lets Encrypt Live Directory
 # Define where LetsEncrypt stores its live certificates.
 #
-# Relative paths are expanded from the install directory.
+# Relative paths are expanded from flight_ROOT or the install directory.
 # ==============================================================================
-# letsencrypt_live_dir: /etc/letsencrypt/live
+# letsencrypt_live_dir: etc/letsencrypt/live
 
 # ==============================================================================
 # Certbot "Binary" and Flags
@@ -101,17 +101,18 @@
 
 # ==============================================================================
 # Cron Path and Script
-# Define the path to and the content of the auto-renewal cron scirpt. Ultimately
-# it needs to run 'bin/cert cert-gen' in some form without any arguments.
+# Define the path to and the content of the auto-renewal cron script.  The
+# script is expected to run 'bin/cert cert-gen' without any arguments.
 #
 # However due to the idiosyncrasies of ruby's versioning, the content of the
 # script will be platform/distribution specific. As such no default has been
 # given for 'cron_scirpt'. It will need to be manually set in the config before
 # auto renewals are possible.
 #
-# The cron path must be absolute.
+# Relative paths for `cron_path` are expanded from flight_ROOT or the install
+# directory.
 # ==============================================================================
-# cron_path: /etc/cron.daily/flight-cert
+# cron_path: etc/cron/weekly/flight-cert-renewal
 # cron_script: 
 
 # ==============================================================================
@@ -133,6 +134,8 @@
 # This service can not generate the content of the disabled files. They must
 # exist before using this application. Failure to ensure the disabled files
 # exist risks the generation of dangling symlinks.
+#
+# Relative paths are expanded from flight_ROOT or the install directory.
 # ==============================================================================
 # https_enable_paths: []
 
@@ -141,7 +144,7 @@
 # Define the system command which will check if the external web service is
 # running. It must exit 0 if and only if the service is running.
 #
-# This config must be set in order for LetsEncrypt to operate correctly
+# This config must be set in order for LetsEncrypt to operate correctly.
 # ==============================================================================
 # status_command:
 
@@ -150,14 +153,14 @@
 # Define the system command which will restart the external web service. It
 # must exit 0 if and only if the service restarted correctly.
 #
-# This config must be set for most operation to function correctly
+# This config must be set for most operations to function correctly.
 # ==============================================================================
 # restart_command:
 
 # ==============================================================================
 # Start Service Command
 # An optional command to include in the error message on how to start the web
-# server. It is not executed by the tool
+# server. It is not executed by the tool.
 # ==============================================================================
 # start_command_prompt: 
 
@@ -166,7 +169,7 @@
 # The file the logger will write to. It will write to standard error if
 # omitted.
 #
-# Relative paths are expanded from the install directory.
+# Relative paths are expanded from flight_ROOT or the install directory.
 # ==============================================================================
 # log_path: var/log/flight-cert.log
 

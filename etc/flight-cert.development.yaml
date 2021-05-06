@@ -1,1 +1,4 @@
 log_level: debug
+https_enable_paths:
+  - etc/www/http.d/https.conf
+  - etc/www/server-http.d/redirect-http-to-https.conf

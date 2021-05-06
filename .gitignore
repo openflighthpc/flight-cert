@@ -6,3 +6,6 @@ vendor
 var
 etc/flight-cert.local.yaml
 etc/flight-cert.development.local.yaml
+etc/www/
+!etc/www/http.d/https.conf.disabled
+!etc/www/server-http.d/redirect-http-to-https.conf.disabled

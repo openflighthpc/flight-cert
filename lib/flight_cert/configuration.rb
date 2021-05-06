@@ -89,20 +89,20 @@ module FlightCert
     attribute :email, required: false
     attribute :domain, required: false
 
-    attribute :selfsigned_dir, default: 'self_signed',
+    attribute :selfsigned_dir, default: 'etc/www/self_signed',
       transform: relative_to(root_path)
-    attribute :ssl_fullchain, default: 'ssl/fullchain.pem',
+    attribute :ssl_fullchain, default: 'etc/www/ssl/fullchain.pem',
       transform: relative_to(root_path)
-    attribute :ssl_privkey, default: 'ssl/privkey.pem',
+    attribute :ssl_privkey, default: 'etc/www/ssl/privkey.pem',
       transform: relative_to(root_path)
-    attribute :letsencrypt_live_dir, default: '/etc/letsencrypt/live',
+    attribute :letsencrypt_live_dir, default: 'etc/letsencrypt/live',
       transform: relative_to(root_path)
 
     attribute :certbot_bin, default: '/usr/local/bin/certbot'
-      # transform: relative_to(root_path)
     attribute :certbot_plugin_flags, default: '--nginx'
 
-    attribute :cron_path, default: '/etc/cron.daily/flight-cert'
+    attribute :cron_path, default: 'etc/cron/weekly/flight-cert-renewal',
+      transform: relative_to(root_path)
     attribute :cron_script, required: false
 
     attribute :https_enable_paths, default: [],
