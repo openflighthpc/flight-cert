@@ -21,6 +21,7 @@ GEM
       paint (~> 2.1.0)
       slop (~> 4.8)
     concurrent-ruby (1.1.8)
+    dotenv (2.7.6)
     highline (2.0.3)
     i18n (1.8.10)
       concurrent-ruby (~> 1.0)
@@ -44,6 +45,7 @@ PLATFORMS
 DEPENDENCIES
   activesupport
   commander-openflighthpc (> 2.0.0)
+  dotenv
   flight_configuration!
   paint
   pry
