@@ -56,7 +56,7 @@ module FlightCert
       transform: relative_to(root_path)
     attribute :ssl_fullchain, default: 'etc/www/ssl/fullchain.pem',
       transform: relative_to(root_path)
-    attribute :ssl_privkey, default: 'etc/www/ssl/privkey.pem',
+    attribute :ssl_privkey, default: 'etc/www/ssl/key.pem',
       transform: relative_to(root_path)
     attribute :letsencrypt_live_dir, default: 'etc/letsencrypt/live',
       transform: relative_to(root_path)

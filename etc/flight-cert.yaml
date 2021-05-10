@@ -64,7 +64,8 @@
 # Define the directory to where self signed certificates will be stored. This
 # path should not be used by the external web service.
 #
-# Relative paths are expanded from flight_ROOT or the install directory.
+# Relative paths are expanded from flight_ROOT (or the install directory, if
+# flight_ROOT is unset).
 # ==============================================================================
 # selfsigned_dir: etc/www/self-signed
 
@@ -74,16 +75,18 @@
 # application will symlink the relevant files to these locations. The external
 # web service should use these symlink files.
 #
-# Relative paths are expanded from flight_ROOT or the install directory.
+# Relative paths are expanded from flight_ROOT (or the install directory, if
+# flight_ROOT is unset).
 # ==============================================================================
 # ssl_fullchain: etc/www/ssl/fullchain.pem
-# ssl_privkey: etc/www/ssl/privkey.pem
+# ssl_privkey: etc/www/ssl/key.pem
 
 # ==============================================================================
 # Lets Encrypt Live Directory
 # Define where LetsEncrypt stores its live certificates.
 #
-# Relative paths are expanded from flight_ROOT or the install directory.
+# Relative paths are expanded from flight_ROOT (or the install directory, if
+# flight_ROOT is unset).
 # ==============================================================================
 # letsencrypt_live_dir: etc/letsencrypt/live
 
@@ -109,8 +112,8 @@
 # given for 'cron_scirpt'. It will need to be manually set in the config before
 # auto renewals are possible.
 #
-# Relative paths for `cron_path` are expanded from flight_ROOT or the install
-# directory.
+# Relative paths for `cron_path` are expanded from flight_ROOT (or the install
+# directory, if flight_ROOT is unset).
 # ==============================================================================
 # cron_path: etc/cron/weekly/flight-cert-renewal
 # cron_script: 
@@ -135,7 +138,8 @@
 # exist before using this application. Failure to ensure the disabled files
 # exist risks the generation of dangling symlinks.
 #
-# Relative paths are expanded from flight_ROOT or the install directory.
+# Relative paths are expanded from flight_ROOT (or the install directory, if
+# flight_ROOT is unset).
 # ==============================================================================
 # https_enable_paths: []
 
@@ -169,7 +173,8 @@
 # The file the logger will write to. It will write to standard error if
 # omitted.
 #
-# Relative paths are expanded from flight_ROOT or the install directory.
+# Relative paths are expanded from flight_ROOT (or the install directory, if
+# flight_ROOT is unset).
 # ==============================================================================
 # log_path: var/log/flight-cert.log
 
