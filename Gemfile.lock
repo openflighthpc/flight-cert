@@ -1,7 +1,7 @@
 GIT
   remote: https://github.com/openflighthpc/flight_configuration.git
-  revision: 85905e36d2db793587bf10b17734a36b6e9197f2
-  branch: 85905e36d2db793587bf10b17734a36b6e9197f2
+  revision: 910898b84e772f203e8b33ef38c8998fb0dadc63
+  branch: master
   specs:
     flight_configuration (0.1.0)
 
@@ -28,12 +28,12 @@ GEM
     method_source (1.0.0)
     minitest (5.14.4)
     paint (2.1.1)
-    pry (0.13.1)
+    pry (0.14.1)
       coderay (~> 1.1)
       method_source (~> 1.0)
-    pry-byebug (3.9.0)
+    pry-byebug (3.8.0)
       byebug (~> 11.0)
-      pry (~> 0.13.0)
+      pry (~> 0.10)
     slop (4.8.2)
     tzinfo (2.0.4)
       concurrent-ruby (~> 1.0)

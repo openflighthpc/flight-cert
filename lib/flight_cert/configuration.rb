@@ -32,43 +32,6 @@ module FlightCert
   class Configuration
     extend FlightConfiguration::DSL
 
-    module FcdslExtensions
-      def application_name(name=nil)
-        @application_name ||= name
-        if @application_name.nil?
-          raise Error, 'The application_name has not been defined!'
-        end
-        @application_name
-      end
-
-      def root_path(*_)
-        super Flight.root
-      end
-
-      def config_files(*_)
-        @config_files ||= [
-          root_path.join("etc/#{application_name}.yaml"),
-          root_path.join("etc/#{application_name}.#{Flight.env}.yaml"),
-          root_path.join("etc/#{application_name}.local.yaml"),
-          root_path.join("etc/#{application_name}.#{Flight.env}.local.yaml"),
-        ]
-        super
-      end
-      alias_method :add_config_files, :config_files
-
-      def env_var_prefix(*_)
-        @env_var_prefix ||=
-          begin
-            parts = application_name.split(/[_-]/)
-            flight_part = (parts.first == 'flight' ? [parts.shift] : [])
-            parts.map!(&:upcase)
-            [*flight_part, *parts].join('_')
-          end
-        super
-      end
-    end
-    extend FcdslExtensions
-
     LETS_ENCRYPT_TYPES  = [
       :lets_encrypt, 'lets-encrypt', 'lets_encrypt', 'letsencrypt',
       'letsEncrypt', 'LetsEncrypt', 'LETS_ENCRYPT'
@@ -172,7 +135,7 @@ module FlightCert
     # provided interactively when generating a certificate.  Any such values
     # are saved separately from the main configuration.
     def save_local_configuration
-      local_config = from_config_file(local_config_file)
+      local_config = self.class.from_config_file(local_config_file)
       new_local_config = local_config.merge(
         'email' => email, 'domain' => domain, 'cert_type' => cert_type
       )
@@ -183,19 +146,6 @@ module FlightCert
 
     def local_config_file
       self.class.config_files.detect { |cf| cf.to_s.match?(/local.yaml$/) }
-    end
-
-    def from_config_file(config_file)
-      return {} unless File.exists?(config_file)
-      yaml =
-        begin
-          YAML.load_file(config_file)
-        rescue ::Psych::SyntaxError
-          raise "YAML syntax error occurred while parsing #{config_file}. " \
-            "Please note that YAML must be consistently indented using spaces. Tabs are not allowed. " \
-            "Error: #{$!.message}"
-        end
-      FlightConfiguration::DeepStringifyKeys.stringify(yaml) || {}
     end
   end
 end
