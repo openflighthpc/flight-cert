@@ -89,7 +89,6 @@ module FlightCert
         end
       end
     attribute :log_level, default: 'error'
-    attribute :development, default: false, required: false
 
     def selfsigned_privkey
       File.join(selfsigned_dir, 'privkey.pem')

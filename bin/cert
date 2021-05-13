@@ -44,7 +44,7 @@ begin
   require_relative '../lib/flight_cert'
   FlightCert.load_configuration
 
-  if FlightCert.config.development
+  if Flight.env.development?
     begin
       Bundler.setup(:default, :development)
       require 'pry'

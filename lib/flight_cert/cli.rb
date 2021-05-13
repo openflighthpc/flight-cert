@@ -110,7 +110,7 @@ module FlightCert
       DESC
     end
 
-    if FlightCert.config.development
+    if Flight.env.development?
       create_command 'console' do |c|
         c.action do
           FlightCert::Command.new([], {}).instance_exec { binding.pry }
