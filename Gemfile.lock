@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/openflighthpc/flight_configuration.git
-  revision: cc304058c629ac0b41f523e76a83d60134f36dea
+  revision: 530bcdce12543fe71a42e332685f04a09bc02a8f
   branch: master
   specs:
     flight_configuration (0.1.0)
@@ -34,7 +34,7 @@ GEM
     pry-byebug (3.8.0)
       byebug (~> 11.0)
       pry (~> 0.10)
-    slop (4.8.2)
+    slop (4.9.0)
     tzinfo (2.0.4)
       concurrent-ruby (~> 1.0)
     zeitwerk (2.4.2)

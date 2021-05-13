@@ -42,7 +42,7 @@ module FlightCert
     ]
     ALL_CERT_TYPES = [*LETS_ENCRYPT_TYPES, *SELF_SIGNED_TYPES]
 
-    application_name 'flight-cert'
+    application_name 'cert'
 
     attribute :program_name, default: 'bin/cert'
     attribute :program_application, default: 'Flight WWW'
@@ -64,7 +64,7 @@ module FlightCert
     attribute :certbot_bin, default: '/usr/local/bin/certbot'
     attribute :certbot_plugin_flags, default: '--nginx'
 
-    attribute :cron_path, default: 'etc/cron/weekly/flight-cert-renewal',
+    attribute :cron_path, default: 'etc/cron/weekly/cert-renewal',
       transform: relative_to(root_path)
     attribute :cron_script, required: false
 
@@ -78,7 +78,7 @@ module FlightCert
     attribute :start_command_prompt, required: false
 
     attribute :log_path, required: false,
-      default: 'var/log/flight-cert.log',
+      default: "var/log/#{application_name}.log",
       transform: ->(path) do
         if path
           relative_to(root_path).call(path).tap do |full_path|

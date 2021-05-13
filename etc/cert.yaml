@@ -115,7 +115,7 @@
 # Relative paths for `cron_path` are expanded from flight_ROOT (or the install
 # directory, if flight_ROOT is unset).
 # ==============================================================================
-# cron_path: etc/cron/weekly/flight-cert-renewal
+# cron_path: etc/cron/weekly/cert-renewal
 # cron_script: 
 
 # ==============================================================================
@@ -176,7 +176,7 @@
 # Relative paths are expanded from flight_ROOT (or the install directory, if
 # flight_ROOT is unset).
 # ==============================================================================
-# log_path: var/log/flight-cert.log
+# log_path: var/log/cert.log
 
 # ==============================================================================
 # Log level
