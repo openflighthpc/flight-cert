@@ -31,7 +31,7 @@ gem 'activesupport', require: 'active_support'
 gem 'commander-openflighthpc', '> 2.0.0'
 gem 'dotenv'
 gem 'flight_configuration', github: 'openflighthpc/flight_configuration',
-  branch: 'master'
+  tag: '0.2.0'
 gem 'paint'
 
 group :development do
