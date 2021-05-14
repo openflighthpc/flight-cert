@@ -42,14 +42,7 @@ module FlightCert
     ]
     ALL_CERT_TYPES = [*LETS_ENCRYPT_TYPES, *SELF_SIGNED_TYPES]
 
-    root_path File.expand_path('../..', __dir__)
-
-    env_var_prefix 'flight_CERT'
-
-    LOCAL_CONFIG_FILE = File.expand_path('etc/flight-cert.local.yaml', root_path)
-    config_files File.expand_path('etc/flight-cert.yaml', root_path),
-                 File.expand_path('etc/flight-cert.development.yaml', root_path),
-                 LOCAL_CONFIG_FILE
+    application_name 'cert'
 
     attribute :program_name, default: 'bin/cert'
     attribute :program_application, default: 'Flight WWW'
@@ -59,30 +52,33 @@ module FlightCert
     attribute :email, required: false
     attribute :domain, required: false
 
-    attribute :selfsigned_dir, default: 'self_signed',
+    attribute :selfsigned_dir, default: 'etc/www/self_signed',
       transform: relative_to(root_path)
-    attribute :ssl_fullchain, default: 'ssl/fullchain.pem',
+    attribute :ssl_fullchain, default: 'etc/www/ssl/fullchain.pem',
       transform: relative_to(root_path)
-    attribute :ssl_privkey, default: 'ssl/privkey.pem',
+    attribute :ssl_privkey, default: 'etc/www/ssl/key.pem',
       transform: relative_to(root_path)
-    attribute :letsencrypt_live_dir, default: '/etc/letsencrypt/live',
+    attribute :letsencrypt_live_dir, default: 'etc/letsencrypt/live',
       transform: relative_to(root_path)
 
     attribute :certbot_bin, default: '/usr/local/bin/certbot'
-      # transform: relative_to(root_path)
     attribute :certbot_plugin_flags, default: '--nginx'
 
-    attribute :cron_path, default: '/etc/cron.daily/flight-cert'
+    attribute :cron_path, default: 'etc/cron/weekly/cert-renewal',
+      transform: relative_to(root_path)
     attribute :cron_script, required: false
 
-    attribute :https_enable_paths, default: []
+    attribute :https_enable_paths, default: [],
+      transform: ->(paths) do
+        paths.map {|p| relative_to(root_path).call(p)}
+      end
 
     attribute :status_command, required: false
     attribute :restart_command, required: false
     attribute :start_command_prompt, required: false
 
     attribute :log_path, required: false,
-      default: 'var/log/flight-cert.log',
+      default: "var/log/#{application_name}.log",
       transform: ->(path) do
         if path
           relative_to(root_path).call(path).tap do |full_path|
@@ -93,7 +89,6 @@ module FlightCert
         end
       end
     attribute :log_level, default: 'error'
-    attribute :development, default: false, required: false
 
     def selfsigned_privkey
       File.join(selfsigned_dir, 'privkey.pem')
@@ -139,26 +134,17 @@ module FlightCert
     # provided interactively when generating a certificate.  Any such values
     # are saved separately from the main configuration.
     def save_local_configuration
-      local_config = from_config_file(LOCAL_CONFIG_FILE)
+      local_config = self.class.from_config_file(local_config_file)
       new_local_config = local_config.merge(
         'email' => email, 'domain' => domain, 'cert_type' => cert_type
       )
-      File.write LOCAL_CONFIG_FILE, YAML.dump(new_local_config)
+      File.write local_config_file, YAML.dump(new_local_config)
     end
 
     private
 
-    def from_config_file(config_file)
-      return {} unless File.exists?(config_file)
-      yaml =
-        begin
-          YAML.load_file(config_file)
-        rescue ::Psych::SyntaxError
-          raise "YAML syntax error occurred while parsing #{config_file}. " \
-            "Please note that YAML must be consistently indented using spaces. Tabs are not allowed. " \
-            "Error: #{$!.message}"
-        end
-      FlightConfiguration::DeepStringifyKeys.stringify(yaml) || {}
+    def local_config_file
+      self.class.config_files.detect { |cf| cf.to_s.match?(/local.yaml$/) }
     end
   end
 end

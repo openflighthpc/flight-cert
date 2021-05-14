@@ -1,35 +1,51 @@
 GIT
   remote: https://github.com/openflighthpc/flight_configuration.git
-  revision: 85905e36d2db793587bf10b17734a36b6e9197f2
-  branch: 85905e36d2db793587bf10b17734a36b6e9197f2
+  revision: 6bdda6c6f13594358245e317b8c42de2630e174c
+  tag: 0.2.0
   specs:
     flight_configuration (0.1.0)
 
 GEM
   remote: https://rubygems.org/
   specs:
+    activesupport (6.1.3.2)
+      concurrent-ruby (~> 1.0, >= 1.0.2)
+      i18n (>= 1.6, < 2)
+      minitest (>= 5.1)
+      tzinfo (~> 2.0)
+      zeitwerk (~> 2.3)
     byebug (11.1.3)
     coderay (1.1.3)
     commander-openflighthpc (2.2.0)
       highline (> 1.7.2)
       paint (~> 2.1.0)
       slop (~> 4.8)
+    concurrent-ruby (1.1.8)
+    dotenv (2.7.6)
     highline (2.0.3)
+    i18n (1.8.10)
+      concurrent-ruby (~> 1.0)
     method_source (1.0.0)
+    minitest (5.14.4)
     paint (2.1.1)
-    pry (0.13.1)
+    pry (0.14.1)
       coderay (~> 1.1)
       method_source (~> 1.0)
-    pry-byebug (3.9.0)
+    pry-byebug (3.8.0)
       byebug (~> 11.0)
-      pry (~> 0.13.0)
-    slop (4.8.2)
+      pry (~> 0.10)
+    slop (4.9.0)
+    tzinfo (2.0.4)
+      concurrent-ruby (~> 1.0)
+    zeitwerk (2.4.2)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
+  activesupport
   commander-openflighthpc (> 2.0.0)
+  dotenv
   flight_configuration!
   paint
   pry

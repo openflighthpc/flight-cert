@@ -33,13 +33,18 @@ begin
   require 'bundler'
   Bundler.setup(:default)
 
+  # Limit use of dotenv to support setting flight_ENVIRONMENT.  It is not
+  # intended to be used in production.
+  require 'dotenv'
+  Dotenv.load('.env.development.local', '.env.development')
+
   # Add lib to LOAD_PATH so that autoloads defined in FlightCert work.
   lib = File.expand_path('../lib', __dir__)
   $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
   require_relative '../lib/flight_cert'
   FlightCert.load_configuration
 
-  if FlightCert.config.development
+  if Flight.env.development?
     begin
       Bundler.setup(:default, :development)
       require 'pry'
