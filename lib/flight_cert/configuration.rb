@@ -25,6 +25,7 @@
 # https://github.com/openflighthpc/flight-cert
 #==============================================================================
 
+require 'dotenv'
 require 'flight_configuration'
 require_relative 'errors'
 
@@ -42,6 +43,8 @@ module FlightCert
     ]
     ALL_CERT_TYPES = [*LETS_ENCRYPT_TYPES, *SELF_SIGNED_TYPES]
 
+    RC = Dotenv.parse(File.join(Flight.root, 'etc/web-suite.rc'))
+
     application_name 'cert'
 
     attribute :program_name, default: 'bin/cert'
@@ -50,7 +53,7 @@ module FlightCert
 
     attribute :cert_type, default: 'lets_encrypt'
     attribute :email, required: false
-    attribute :domain, required: false
+    attribute :domain, required: false, default: RC['flight_WEB_SUITE_domain']
 
     attribute :selfsigned_dir, default: 'etc/www/self_signed',
       transform: relative_to(root_path)
