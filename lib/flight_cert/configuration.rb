@@ -136,15 +136,46 @@ module FlightCert
     # The configuration for the certificate type, email and domain can be
     # provided interactively when generating a certificate.  Any such values
     # are saved separately from the main configuration.
+    #
+    # NOTE: The behaviour is "undefined" if the 'domain' is set via a
+    #       development config or flight_CERT_domain.
+    #
+    #       If the dev config or env var sets the value it *may* be saved
+    #       in the local config. It will not be saved if the domain:
+    #
+    #       1. Matches flight_WEB_SUITE_domain set via the RC, or
+    #       2. Matches the domain in 'etc/cert.yaml' notwithstanding option 1.
+    #
+    #       This means flight_CERT_domain is not ephemeral and maybe cached.
+    #       This may or may not be the desired behaviour.
+    #
+    #       It also means that --domain may not be remembered across command
+    #       executions if it has been set in a development config. The above
+    #       mentioned mechanism may prevent it being saved, causing the dev
+    #       config to take precedence the next time a command is ran.
     def save_local_configuration
-      local_config = self.class.from_config_file(local_config_file)
-      new_local_config = local_config.merge(
+      # Load the config files
+      core_config = self.class.from_config_file(core_config_file)
+      new_config = self.class.from_config_file(local_config_file)
+                               .merge(
         'email' => email, 'domain' => domain, 'cert_type' => cert_type
       )
-      File.write local_config_file, YAML.dump(new_local_config)
+
+      # The core_config takes precedence over the RC.
+      if core_config.key? 'domain'
+        new_config.delete('domain') if new_config['domain'] == core_config['domain']
+      else
+        new_config.delete('domain') if new_config['domain'] == RC['flight_WEB_SUITE_domain']
+      end
+
+      File.write local_config_file, YAML.dump(new_config)
     end
 
     private
+
+    def core_config_file
+      self.class.config_files.first
+    end
 
     def local_config_file
       self.class.config_files.detect { |cf| cf.to_s.match?(/local.yaml$/) }
