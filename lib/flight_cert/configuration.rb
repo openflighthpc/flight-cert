@@ -53,7 +53,8 @@ module FlightCert
 
     attribute :cert_type, default: 'lets_encrypt'
     attribute :email, required: false
-    attribute :domain, required: false, default: RC['flight_WEB_SUITE_domain']
+    attribute :domain, required: false, default: RC['flight_WEB_SUITE_domain'],
+      env_var: false
 
     attribute :selfsigned_dir, default: 'etc/www/self_signed',
       transform: relative_to(root_path)
@@ -136,32 +137,29 @@ module FlightCert
     # The configuration for the certificate type, email and domain can be
     # provided interactively when generating a certificate.  Any such values
     # are saved separately from the main configuration.
-    #
-    # NOTE: The behaviour is "undefined" if the 'domain' is set via a
-    #       development config or flight_CERT_domain.
-    #
-    #       If the dev config or env var sets the value it *may* be saved
-    #       in the local config. It will not be saved if the domain:
-    #
-    #       1. Matches flight_WEB_SUITE_domain set via the RC, or
-    #       2. Matches the domain in 'etc/cert.yaml' notwithstanding option 1.
-    #
-    #       This means flight_CERT_domain is not ephemeral and maybe cached.
-    #       This may or may not be the desired behaviour.
-    #
-    #       It also means that --domain may not be remembered across command
-    #       executions if it has been set in a development config. The above
-    #       mentioned mechanism may prevent it being saved, causing the dev
-    #       config to take precedence the next time a command is ran.
     def save_local_configuration
-      # Load the config files
       core_config = self.class.from_config_file(core_config_file)
       new_config = self.class.from_config_file(local_config_file)
                                .merge(
         'email' => email, 'domain' => domain, 'cert_type' => cert_type
       )
 
-      # The core_config takes precedence over the RC.
+      # There are some hoops to jump through with regard to the domain.
+      #
+      # In production, there are four sources from which the domain can be
+      # taken:
+      #
+      # 1. The `RC` file
+      # 2. `cert.yaml` (aka core config file)
+      # 3. `cert.local.yaml` (aka local config file)
+      # 4. The `--domain` CLI option.
+      #
+      # If the domain comes from (3) or (4) we wish to save it to (3) unless
+      # it is the same as the highest precedent value from (1) or (2).
+      # 
+      # In development, there is the complication of the
+      # `cert.development.yaml` and `cert.development.local.yaml` files.  We
+      # currently ignore them here.
       if core_config.key? 'domain'
         new_config.delete('domain') if new_config['domain'] == core_config['domain']
       else
