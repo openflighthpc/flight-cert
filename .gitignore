@@ -4,6 +4,7 @@ tmp
 .bundle
 vendor
 var
+etc/web-suite.rc
 etc/cert*.local.yaml
 etc/www/
 !etc/www/http.d/https.conf.disabled
