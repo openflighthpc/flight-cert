@@ -55,15 +55,16 @@ module FlightCert
           FileUtils.ln_sf "#{path}.disabled", path
         end
 
-        if FlightCert.run_restart_command
-          puts 'HTTPs has been enabled'
-        else
-          raise GeneralError, <<~ERROR.chomp
+        # Attempt to restart the service if required
+        if FlightCert.run_status_command
+          raise GeneralError, <<~ERROR.chomp unless FlightCert.run_restart_command
             HTTPs has been enabled but the web server failed to restart!
             HTTPs maybe disabled again with:
           #{Paint["#{FlightCert.config.program_name} disable-https", :yellow]}
           ERROR
         end
+
+        puts 'HTTPs has been enabled'
       end
 
       private

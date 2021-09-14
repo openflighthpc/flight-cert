@@ -1,4 +1,3 @@
-#==============================================================================
 # Copyright (C) 2020-present Alces Flight Ltd.
 #
 # This file is part of FlightCert.
@@ -45,13 +44,14 @@ module FlightCert
         end
         FlightCert.config.https_enable_paths.each { |p| FileUtils.rm_f p }
 
-        if FlightCert.run_restart_command
-          puts 'HTTPs has been disabled'
-        else
-          raise GeneralError, <<~ERROR.chomp
+        # Attempt to restart the service (when required)
+        if FlightCert.run_status_command
+          raise GeneralError, <<~ERROR.chomp unless FlightCert.run_restart_command
             HTTPs has been disabled but the web server failed to restart!
           ERROR
         end
+
+        puts 'HTTPs has been disabled'
       end
     end
   end
