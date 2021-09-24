@@ -44,6 +44,10 @@ module FlightCert
         end
         FlightCert.config.https_enable_paths.each { |p| FileUtils.rm_f p }
 
+        unless FlightCert.https_disabled?
+          raise GeneralError, 'Failed to disable HTTPS'
+        end
+
         # Attempt to restart the service (when required)
         if FlightCert.run_status_command
           raise GeneralError, <<~ERROR.chomp unless FlightCert.run_restart_command

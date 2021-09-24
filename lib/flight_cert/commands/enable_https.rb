@@ -55,6 +55,10 @@ module FlightCert
           FileUtils.ln_sf "#{path}.disabled", path
         end
 
+        unless FlightCert.https_enabled?
+          raise GeneralError, 'Failed to enable HTTPS'
+        end
+
         # Attempt to restart the service if required
         if FlightCert.run_status_command
           raise GeneralError, <<~ERROR.chomp unless FlightCert.run_restart_command
