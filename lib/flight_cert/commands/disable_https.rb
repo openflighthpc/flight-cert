@@ -29,7 +29,7 @@ module FlightCert
     class DisableHttps < Command
       def run
         if FlightCert.https_disabled?
-          raise GeneralError, 'The HTTPs server is already disabled'
+          raise GeneralError, 'The HTTPS server is already disabled'
         end
 
         # Make sure we don't delete actual files; only symlinks.  In practice,
@@ -51,11 +51,11 @@ module FlightCert
         # Attempt to restart the service (when required)
         if FlightCert.run_status_command
           raise GeneralError, <<~ERROR.chomp unless FlightCert.run_restart_command
-            HTTPs has been disabled but the web server failed to restart!
+            HTTPS has been disabled but the web server failed to restart!
           ERROR
         end
 
-        puts 'HTTPs has been disabled'
+        puts 'HTTPS has been disabled'
       end
     end
   end
