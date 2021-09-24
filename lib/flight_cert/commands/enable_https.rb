@@ -31,14 +31,14 @@ module FlightCert
       def run
         unless ssl_certs_exist?
           raise GeneralError, <<~ERROR.chomp
-            In order to enable HTTPs a set of SSL certificates need to be generated.
+            In order to enable HTTPS a set of SSL certificates need to be generated.
             Please run the following to generate the certificates with Let's Encrypt:
             #{Paint["#{FlightCert.config.program_name} cert-gen --cert-type lets-encrypt --domain DOMAIN --email EMAIL", :yellow]}
           ERROR
         end
 
         if FlightCert.https_enabled?
-          raise GeneralError, 'The HTTPs server is already enabled'
+          raise GeneralError, 'The HTTPS server is already enabled'
         end
 
         # Ensure no data is going to be overridden.  We want to enable HTTPS
@@ -55,15 +55,20 @@ module FlightCert
           FileUtils.ln_sf "#{path}.disabled", path
         end
 
-        if FlightCert.run_restart_command
-          puts 'HTTPs has been enabled'
-        else
-          raise GeneralError, <<~ERROR.chomp
-            HTTPs has been enabled but the web server failed to restart!
-            HTTPs maybe disabled again with:
+        unless FlightCert.https_enabled?
+          raise GeneralError, 'Failed to enable HTTPS'
+        end
+
+        # Attempt to restart the service if required
+        if FlightCert.run_status_command
+          raise GeneralError, <<~ERROR.chomp unless FlightCert.run_restart_command
+            HTTPS has been enabled but the web server failed to restart!
+            HTTPS maybe disabled again with:
           #{Paint["#{FlightCert.config.program_name} disable-https", :yellow]}
           ERROR
         end
+
+        puts 'HTTPS has been enabled'
       end
 
       private

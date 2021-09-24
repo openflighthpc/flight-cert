@@ -1,4 +1,3 @@
-#==============================================================================
 # Copyright (C) 2020-present Alces Flight Ltd.
 #
 # This file is part of FlightCert.
@@ -30,7 +29,7 @@ module FlightCert
     class DisableHttps < Command
       def run
         if FlightCert.https_disabled?
-          raise GeneralError, 'The HTTPs server is already disabled'
+          raise GeneralError, 'The HTTPS server is already disabled'
         end
 
         # Make sure we don't delete actual files; only symlinks.  In practice,
@@ -45,13 +44,18 @@ module FlightCert
         end
         FlightCert.config.https_enable_paths.each { |p| FileUtils.rm_f p }
 
-        if FlightCert.run_restart_command
-          puts 'HTTPs has been disabled'
-        else
-          raise GeneralError, <<~ERROR.chomp
-            HTTPs has been disabled but the web server failed to restart!
+        unless FlightCert.https_disabled?
+          raise GeneralError, 'Failed to disable HTTPS'
+        end
+
+        # Attempt to restart the service (when required)
+        if FlightCert.run_status_command
+          raise GeneralError, <<~ERROR.chomp unless FlightCert.run_restart_command
+            HTTPS has been disabled but the web server failed to restart!
           ERROR
         end
+
+        puts 'HTTPS has been disabled'
       end
     end
   end

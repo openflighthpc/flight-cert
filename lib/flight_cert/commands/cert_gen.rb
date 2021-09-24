@@ -47,16 +47,17 @@ module FlightCert
 
         link_certificates
 
-        # Attempts to restart the service
-        if FlightCert.https_enabled?
+        # Attempts to restart the service (if required)
+        if FlightCert.https_enabled? && FlightCert.run_status_command
           unless FlightCert.run_restart_command
             raise GeneralError, <<~ERROR.chomp
               Failed to restart the web server with the new certificate!
             ERROR
           end
+        end
 
-        # Notifies the user how to enable https
-        else
+        # Notify the restart has been skipped as the service has been stopped
+        unless FlightCert.https_enabled?
           $stderr.puts <<~WARN
             You can now enable the HTTPS server with:
             #{Paint["#{FlightCert.config.program_name} enable-https", :yellow]}

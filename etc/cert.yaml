@@ -31,7 +31,7 @@
 # ==============================================================================
 # program_name: bin/cert
 # program_application: 'Flight WWW'
-# program_description: 'Manage the HTTPs server and SSL certificates'
+# program_description: 'Manage the HTTPS server and SSL certificates'
 
 # ==============================================================================
 # Certificate Type
@@ -120,11 +120,11 @@
 
 # ==============================================================================
 # HTTPS Enabled Paths
-# Specify a list of files required by the HTTPs which are normally disabled.
+# Specify a list of files required by the HTTPS which are normally disabled.
 # The following assumptions must be valid for this application to function:
 # * All the paths form a "path pair" of enabled and disabled files,
 # * All paths must be absolute,
-# * The HTTPs server is only considered running if all the enabled files exist,
+# * The HTTPS server is only considered running if all the enabled files exist,
 # * This config provides a list of "enable paths",
 # * A "disable path" matches its corresponding "enable path" with an
 #   additional '.disabled' file extension, and

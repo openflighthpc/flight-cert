@@ -49,7 +49,7 @@ module FlightCert
 
     attribute :program_name, default: 'bin/cert'
     attribute :program_application, default: 'Flight WWW'
-    attribute :program_description, default: 'Manage the HTTPs server and SSL certificates'
+    attribute :program_description, default: 'Manage the HTTPS server and SSL certificates'
 
     attribute :cert_type, default: 'lets_encrypt'
     attribute :email, required: false
