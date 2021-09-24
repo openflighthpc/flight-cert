@@ -31,7 +31,7 @@ require_relative 'errors'
 
 module FlightCert
   class Configuration
-    extend FlightConfiguration::DSL
+    include FlightConfiguration::DSL
 
     LETS_ENCRYPT_TYPES  = [
       :lets_encrypt, 'lets-encrypt', 'lets_encrypt', 'letsencrypt',
@@ -46,6 +46,8 @@ module FlightCert
     RC = Dotenv.parse(File.join(Flight.root, 'etc/web-suite.rc'))
 
     application_name 'cert'
+
+    user_config_files false
 
     attribute :program_name, default: 'bin/cert'
     attribute :program_application, default: 'Flight WWW'
@@ -134,20 +136,23 @@ module FlightCert
       end
     end
 
+    class << self
+      # The save_local_configuration method requires access to this class
+      # method.
+      public :from_config_file
+    end
+
     # The configuration for the certificate type, email and domain can be
     # provided interactively when generating a certificate.  Any such values
     # are saved separately from the main configuration.
     def save_local_configuration
       core_config = self.class.from_config_file(core_config_file)
       new_config = self.class.from_config_file(local_config_file)
-                               .merge(
-        'email' => email, 'domain' => domain, 'cert_type' => cert_type
-      )
+        .merge('email' => email, 'domain' => domain, 'cert_type' => cert_type)
 
       # There are some hoops to jump through with regard to the domain.
       #
-      # In production, there are four sources from which the domain can be
-      # taken:
+      # There are four sources from which the domain can be taken:
       #
       # 1. The `RC` file
       # 2. `cert.yaml` (aka core config file)
@@ -157,9 +162,8 @@ module FlightCert
       # If the domain comes from (3) or (4) we wish to save it to (3) unless
       # it is the same as the highest precedent value from (1) or (2).
       # 
-      # In development, there is the complication of the
-      # `cert.development.yaml` and `cert.development.local.yaml` files.  We
-      # currently ignore them here.
+      # There are actually two more sources: the `cert.#{Flight.env}.yaml` and
+      # `cert.#{Flight.env}.local.yaml` files.  We currently ignore.
       if core_config.key? 'domain'
         new_config.delete('domain') if new_config['domain'] == core_config['domain']
       else

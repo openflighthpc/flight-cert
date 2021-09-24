@@ -34,7 +34,7 @@ module FlightCert
 
         # Make sure we don't delete actual files; only symlinks.  In practice,
         # this error shouldn't occur.
-        FlightCert.config.https_enable_paths.each do |path|
+        Flight.config.https_enable_paths.each do |path|
           if File.exists?(path) && !File.symlink?(path)
             raise InternalError, <<~ERROR.chomp
               Cowardly refusing to disable HTTPS as the following file is not linked correctly:
@@ -42,7 +42,7 @@ module FlightCert
             ERROR
           end
         end
-        FlightCert.config.https_enable_paths.each { |p| FileUtils.rm_f p }
+        Flight.config.https_enable_paths.each { |p| FileUtils.rm_f p }
 
         unless FlightCert.https_disabled?
           raise GeneralError, 'Failed to disable HTTPS'

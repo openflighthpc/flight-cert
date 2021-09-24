@@ -35,7 +35,7 @@ module FlightCert
       const = constantize(s)
       self.const_get(const).new(*args, **opts)
     rescue NameError
-      FlightCert.logger.fatal "Command class not defined: #{self}::#{const}"
+      Flight.logger.fatal "Command class not defined: #{self}::#{const}"
       raise InternalError, 'Command Not Found!'
     end
 

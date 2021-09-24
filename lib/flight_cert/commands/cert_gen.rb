@@ -35,7 +35,7 @@ module FlightCert
         process_options
         ensure_domain_is_set
         ensure_letsencrypt_has_an_email
-        FlightCert.config.save_local_configuration
+        Flight.config.save_local_configuration
 
         if options.config_only
           puts "Configuration updated. Skipping certificate generation."
@@ -43,7 +43,7 @@ module FlightCert
         end
 
         # Generate the certificates
-        FlightCert.config.letsencrypt? ? generate_letsencrypt : generate_selfsigned
+        Flight.config.letsencrypt? ? generate_letsencrypt : generate_selfsigned
 
         link_certificates
 
@@ -60,7 +60,7 @@ module FlightCert
         unless FlightCert.https_enabled?
           $stderr.puts <<~WARN
             You can now enable the HTTPS server with:
-            #{Paint["#{FlightCert.config.program_name} enable-https", :yellow]}
+            #{Paint["#{Flight.config.program_name} enable-https", :yellow]}
           WARN
         end
       end
@@ -72,7 +72,7 @@ module FlightCert
       def process_options
         all_cert_types = FlightCert::Configuration::ALL_CERT_TYPES
         if options.cert_type && all_cert_types.include?(options.cert_type)
-          FlightCert.config.cert_type = options.cert_type
+          Flight.config.cert_type = options.cert_type
         elsif options.cert_type
           raise InputError, <<~ERROR.chomp
             Unrecognized certificate type: #{options.cert_type}
@@ -85,9 +85,9 @@ module FlightCert
           $stderr.puts <<~ERROR.chomp
             Clearing the email setting...
           ERROR
-          FlightCert.config.email = nil
+          Flight.config.email = nil
         elsif options.email
-          FlightCert.config.email = options.email
+          Flight.config.email = options.email
         end
 
         # Updates the domain field
@@ -95,16 +95,16 @@ module FlightCert
           $stderr.puts <<~ERROR.chomp
             Clearing the domain setting...
           ERROR
-          FlightCert.config.domain = nil
+          Flight.config.domain = nil
         elsif options.domain
-          FlightCert.config.domain  = options.domain
+          Flight.config.domain  = options.domain
         end
       end
 
       ##
       # Raises an error if the domain has not been set
       def ensure_domain_is_set
-        domain = FlightCert.config.domain
+        domain = Flight.config.domain
         return if !(domain.nil? || domain.empty?)
 
         raise GeneralError, <<~ERROR.chomp
@@ -116,8 +116,8 @@ module FlightCert
       ##
       # Errors if the email is unset for LetsEncrypt certificates
       def ensure_letsencrypt_has_an_email
-        email = FlightCert.config.email
-        return unless FlightCert.config.letsencrypt? && (email.nil? || email.empty?)
+        email = Flight.config.email
+        return unless Flight.config.letsencrypt? && (email.nil? || email.empty?)
         puts <<~ERROR.chomp
           A Let's Encrypt certificates cannot be generated without an email!
           Please provide the following flag: #{Paint['--email EMAIL', :yellow]}
@@ -131,25 +131,25 @@ module FlightCert
         # Checks if the external service is running
         unless FlightCert.run_status_command
           msg = "The external web service does not appear to be running!"
-          if FlightCert.config.start_command_prompt
-            msg += "\nPlease start it with:\n#{Paint[FlightCert.config.start_command_prompt, :yellow]}"
+          if Flight.config.start_command_prompt
+            msg += "\nPlease start it with:\n#{Paint[Flight.config.start_command_prompt, :yellow]}"
           end
           raise GeneralError, msg
         end
 
         puts "Generating a Let's Encrypt certificate, please wait..."
         cmd = [
-          FlightCert.config.certbot_bin,
+          Flight.config.certbot_bin,
           'certonly', '-n', '--agree-tos',
-          '--domain', FlightCert.config.domain,
-          '--email', FlightCert.config.email,
-          *Shellwords.shellsplit(FlightCert.config.certbot_plugin_flags)
+          '--domain', Flight.config.domain,
+          '--email', Flight.config.email,
+          *Shellwords.shellsplit(Flight.config.certbot_plugin_flags)
         ]
-        FlightCert.logger.info "Command (approx): #{cmd.join(' ')}"
+        Flight.logger.info "Command (approx): #{cmd.join(' ')}"
         out, err, status = Open3.capture3(*cmd)
-        FlightCert.logger.info "Exited: #{status.exitstatus}"
-        FlightCert.logger.debug "STDOUT: #{out}"
-        FlightCert.logger.debug "STDERR: #{err}"
+        Flight.logger.info "Exited: #{status.exitstatus}"
+        Flight.logger.debug "STDOUT: #{out}"
+        Flight.logger.debug "STDERR: #{err}"
         if status.success?
           puts 'Certificate generated.'
         else
@@ -165,25 +165,25 @@ module FlightCert
       # Generates a self signed certificate
       def generate_selfsigned
         puts "Generating a self-signed certificate with a 10 year expiry. Please wait..."
-        builder = SelfSignedBuilder.new(FlightCert.config.domain, FlightCert.config.email)
-        FileUtils.mkdir_p FlightCert.config.selfsigned_dir
-        File.write        FlightCert.config.selfsigned_fullchain, builder.to_fullchain
-        File.write        FlightCert.config.selfsigned_privkey,   builder.key.to_s
+        builder = SelfSignedBuilder.new(Flight.config.domain, Flight.config.email)
+        FileUtils.mkdir_p Flight.config.selfsigned_dir
+        File.write        Flight.config.selfsigned_fullchain, builder.to_fullchain
+        File.write        Flight.config.selfsigned_privkey,   builder.key.to_s
         puts 'Certificate generated.'
       end
 
       ##
       # Symlinks the relevant certificate/private key into the SSL directory
       def link_certificates
-        ssl_privkey = FlightCert.config.ssl_privkey
-        ssl_fullchain = FlightCert.config.ssl_fullchain
+        ssl_privkey = Flight.config.ssl_privkey
+        ssl_fullchain = Flight.config.ssl_fullchain
 
-        privkey = FlightCert.config.letsencrypt? ?
-          FlightCert.config.letsencrypt_privkey :
-          FlightCert.config.selfsigned_privkey
-        fullchain = FlightCert.config.letsencrypt? ?
-          FlightCert.config.letsencrypt_fullchain :
-          FlightCert.config.selfsigned_fullchain
+        privkey = Flight.config.letsencrypt? ?
+          Flight.config.letsencrypt_privkey :
+          Flight.config.selfsigned_privkey
+        fullchain = Flight.config.letsencrypt? ?
+          Flight.config.letsencrypt_fullchain :
+          Flight.config.selfsigned_fullchain
 
         FileUtils.mkdir_p File.dirname(ssl_privkey)
         FileUtils.mkdir_p File.dirname(ssl_fullchain)

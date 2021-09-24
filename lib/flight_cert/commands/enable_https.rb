@@ -33,7 +33,7 @@ module FlightCert
           raise GeneralError, <<~ERROR.chomp
             In order to enable HTTPS a set of SSL certificates need to be generated.
             Please run the following to generate the certificates with Let's Encrypt:
-            #{Paint["#{FlightCert.config.program_name} cert-gen --cert-type lets-encrypt --domain DOMAIN --email EMAIL", :yellow]}
+            #{Paint["#{Flight.config.program_name} cert-gen --cert-type lets-encrypt --domain DOMAIN --email EMAIL", :yellow]}
           ERROR
         end
 
@@ -43,7 +43,7 @@ module FlightCert
 
         # Ensure no data is going to be overridden.  We want to enable HTTPS
         # only by managing symlinks.
-        FlightCert.config.https_enable_paths.each do |path|
+        Flight.config.https_enable_paths.each do |path|
           if File.exists?(path) && !File.symlink?(path)
             raise InternalError, <<~ERROR.chomp
               Cowardly refusing to enable HTTPS as the following file already exists:
@@ -51,7 +51,7 @@ module FlightCert
             ERROR
           end
         end
-        FlightCert.config.https_enable_paths.each do |path|
+        Flight.config.https_enable_paths.each do |path|
           FileUtils.ln_sf "#{path}.disabled", path
         end
 
@@ -64,7 +64,7 @@ module FlightCert
           raise GeneralError, <<~ERROR.chomp unless FlightCert.run_restart_command
             HTTPS has been enabled but the web server failed to restart!
             HTTPS maybe disabled again with:
-          #{Paint["#{FlightCert.config.program_name} disable-https", :yellow]}
+          #{Paint["#{Flight.config.program_name} disable-https", :yellow]}
           ERROR
         end
 
@@ -74,8 +74,8 @@ module FlightCert
       private
 
       def ssl_certs_exist?
-        File.exists?(FlightCert.config.ssl_fullchain) &&
-          File.exists?(FlightCert.config.ssl_privkey)
+        File.exists?(Flight.config.ssl_fullchain) &&
+          File.exists?(Flight.config.ssl_privkey)
       end
     end
   end

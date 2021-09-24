@@ -31,9 +31,9 @@ module FlightCert
   module CLI
     extend Commander::CLI
 
-    program :name, FlightCert.config.program_name
-    program :application, FlightCert.config.program_application
-    program :description, FlightCert.config.program_description
+    program :name, Flight.config.program_name
+    program :application, Flight.config.program_application
+    program :description, Flight.config.program_description
     program :version, "v#{FlightCert::VERSION}"
     program :help_paging, false
     default_command :help
@@ -59,7 +59,7 @@ module FlightCert
       c.summary = 'Generate and renew SSL certificates'
       c.description = <<~DESC.chomp
         By default the HTTPS server is disabled as it requires an SSL certificate.
-        The '#{FlightCert.config.program_name}' utilities support the generation of Let's Encrypt and
+        The '#{Flight.config.program_name}' utilities support the generation of Let's Encrypt and
         self-signed certificates.  We recommended that a Let's Encrypt certificate
         is generated where possible.
 
@@ -69,12 +69,12 @@ module FlightCert
         challenge.  Once ready, A Let's Encrypt certificate can be generated with
         the following command:
 
-        '#{FlightCert.config.program_name} cert-gen --cert-type lets-encrypt --domain DOMAIN --email EMAIL'
+        '#{Flight.config.program_name} cert-gen --cert-type lets-encrypt --domain DOMAIN --email EMAIL'
 
         Alternatively, a self-signed SSL certificate valid for 10 years can be
         generated, by running the following command:
 
-        '#{FlightCert.config.program_name} cert-gen --cert-type self-signed --domain DOMAIN'
+        '#{Flight.config.program_name} cert-gen --cert-type self-signed --domain DOMAIN'
       DESC
       c.slop.string '--cert-type', 'Select the certificate type: lets-encrypt|self-signed'
       c.slop.string '--domain', 'The domain associated with the certificate'
@@ -87,7 +87,7 @@ module FlightCert
       c.description = <<~DESC.chomp
         A Let's Encrypt certificate will need to be periodically renewed.  You
         can enable automatic renewal of Let's Encrypt certificates by running:
-        '#{FlightCert.config.program_name} cron-renewal'
+        '#{Flight.config.program_name} cron-renewal'
 
         Self-signed certificates are valid for 10 years and automatic renewal is not
         supported.

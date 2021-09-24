@@ -30,8 +30,7 @@ source 'https://rubygems.org'
 gem 'activesupport', require: 'active_support'
 gem 'commander-openflighthpc', '> 2.0.0'
 gem 'dotenv'
-gem 'flight_configuration', github: 'openflighthpc/flight_configuration',
-  tag: '0.2.0'
+gem 'flight_configuration', github: 'openflighthpc/flight_configuration', tag: '0.6.1'
 gem 'paint'
 
 group :development do

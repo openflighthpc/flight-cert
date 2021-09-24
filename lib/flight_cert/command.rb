@@ -38,17 +38,17 @@ module FlightCert
     end
 
     def run!
-      FlightCert.logger.info "Running: #{self.class}"
+      Flight.logger.info "Running: #{self.class}"
       run
-      FlightCert.logger.info 'Exited: 0'
+      Flight.logger.info 'Exited: 0'
     rescue => e
       if e.respond_to? :exit_code
-        FlightCert.logger.fatal "Exited: #{e.exit_code}"
+        Flight.logger.fatal "Exited: #{e.exit_code}"
       else
-        FlightCert.logger.fatal 'Exited non-zero'
+        Flight.logger.fatal 'Exited non-zero'
       end
-      FlightCert.logger.debug e.backtrace.reverse.join("\n")
-      FlightCert.logger.error "(#{e.class}) #{e.message}"
+      Flight.logger.debug e.backtrace.reverse.join("\n")
+      Flight.logger.error "(#{e.class}) #{e.message}"
       raise e
     end
 
