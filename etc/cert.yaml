@@ -36,10 +36,6 @@
 # ==============================================================================
 # Certificate Type
 # Specify whether a "lets_encrypt" or "self_signed" certificate should be used.
-#
-# It is recommended that snake_case is used for the values, but other cases are
-# accepted. This includes:
-# snake_case, kebab-case, CamalCase, UPPER_SNAKE (+ others)
 # ==============================================================================
 # cert_type: 'lets_encrypt'
 
@@ -61,22 +57,23 @@
 
 # ==============================================================================
 # Self Signed Directory
-# Define the directory to where self signed certificates will be stored. This
-# path should not be used by the external web service.
+# Define the directory to where self signed certificates will be stored.  The
+# web service should not be configured to load these file directly, see
+# `ssl_fullchain` and `ssl_privkey` for more information.
 #
-# Relative paths are expanded from flight_ROOT (or the install directory, if
-# flight_ROOT is unset).
+# Relative paths are expanded according to the "Relative path expansion" rules
+# described below.
 # ==============================================================================
 # selfsigned_dir: etc/www/self-signed
 
 # ==============================================================================
 # SSL Fullchain Certificate and Private Key
 # Define the path to the target SSL fullchain  and private key files. The
-# application will symlink the relevant files to these locations. The external
-# web service should use these symlink files.
+# application will symlink the relevant files to these locations. The web
+# service should be configured to load these symlinks when they exist.
 #
-# Relative paths are expanded from flight_ROOT (or the install directory, if
-# flight_ROOT is unset).
+# Relative paths are expanded according to the "Relative path expansion" rules
+# described below.
 # ==============================================================================
 # ssl_fullchain: etc/www/ssl/fullchain.pem
 # ssl_privkey: etc/www/ssl/key.pem
@@ -85,8 +82,8 @@
 # Lets Encrypt Live Directory
 # Define where LetsEncrypt stores its live certificates.
 #
-# Relative paths are expanded from flight_ROOT (or the install directory, if
-# flight_ROOT is unset).
+# Relative paths are expanded according to the "Relative path expansion" rules
+# described below.
 # ==============================================================================
 # letsencrypt_live_dir: etc/letsencrypt/live
 
@@ -105,41 +102,38 @@
 # ==============================================================================
 # Cron Path and Script
 # Define the path to and the content of the auto-renewal cron script.  The
-# script is expected to run 'bin/cert cert-gen' without any arguments.
+# script is expected to run 'bin/cert cert-gen' without any arguments.  You
+# will likely need to use a full path to 'bin/cert`.
 #
-# However due to the idiosyncrasies of ruby's versioning, the content of the
-# script will be platform/distribution specific. As such no default has been
-# given for 'cron_scirpt'. It will need to be manually set in the config before
-# auto renewals are possible.
+# 'cron_path' needs to be a path that the cron daemon will process.  It should
+# be ran weekly.
 #
-# Relative paths for `cron_path` are expanded from flight_ROOT (or the install
-# directory, if flight_ROOT is unset).
+# Relative paths are expanded according to the "Relative path expansion" rules
+# described below.
 # ==============================================================================
 # cron_path: etc/cron/weekly/cert-renewal
 # cron_script: 
 
 # ==============================================================================
 # HTTPS Enabled Paths
-# Specify a list of files required by the HTTPS which are normally disabled.
-# The following assumptions must be valid for this application to function:
-# * All the paths form a "path pair" of enabled and disabled files,
-# * All paths must be absolute,
-# * The HTTPS server is only considered running if all the enabled files exist,
-# * This config provides a list of "enable paths",
-# * A "disable path" matches its corresponding "enable path" with an
-#   additional '.disabled' file extension, and
-# * All the disabled files exist.
+# Specify a list of symlinks to create and remove when HTTPS is enabled and
+# disabled.  The following must be valid:
 #
-# The `enable-https` will generate symlinks from the enable paths to their
-# corresponding disabled path. The `disable-https` method will remove all these
-# symlinks.
+# * The listed paths are managed by Flight Cert.
+# * For each listed file there is a corresponding '.disabled' file.  The
+#   '.disabled' file is named as per the listed file, but with an additional
+#   '.disabled' path.
+# * Creating a symlink from each listed file to its '.disabled' file (and
+#   restarting the web server) is sufficient to enable HTTPS.
+# * Removing the symlinks from each listed file to its '.disabled' file (and
+#   restarting the web server) is sufficient to disable HTTPS.
 #
-# This service can not generate the content of the disabled files. They must
+# Flight Cert does not generate the content of the disabled files. They must
 # exist before using this application. Failure to ensure the disabled files
 # exist risks the generation of dangling symlinks.
 #
-# Relative paths are expanded from flight_ROOT (or the install directory, if
-# flight_ROOT is unset).
+# Relative paths are expanded according to the "Relative path expansion" rules
+# described below.
 # ==============================================================================
 # https_enable_paths: []
 
@@ -173,8 +167,8 @@
 # The file the logger will write to. It will write to standard error if
 # omitted.
 #
-# Relative paths are expanded from flight_ROOT (or the install directory, if
-# flight_ROOT is unset).
+# Relative paths are expanded according to the "Relative path expansion" rules
+# described below.
 # ==============================================================================
 # log_path: var/log/cert.log
 
@@ -184,3 +178,18 @@
 # Valid levels: 'disabled', 'fatal', 'error', 'warn', 'info', 'debug'
 # ==============================================================================
 # log_level: error
+
+# ==============================================================================
+# Relative path expansion rules
+#
+# Relative paths, where supported, are expanded in one of two ways:
+#
+# 1. If Flight Cert was installed from the OpenFlight package repos, they will
+#    be expanded from the value of the `flight_ROOT` environment
+#    variable.
+# 2. Otherwise they will be expanded from the Flight Cert installation
+#    directory.
+#
+# More details can be found at
+# https://github.com/openflighthpc/flight-cert/blob/master/docs/environment-modes.md
+# ==============================================================================
