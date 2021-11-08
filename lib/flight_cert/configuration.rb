@@ -41,7 +41,11 @@ module FlightCert
       :self_signed,  'self-signed',  'self_signed',  'selfsigned',
       'selfSigned',  'SelfSigned',  'SELF_SIGNED'
     ]
-    ALL_CERT_TYPES = [*LETS_ENCRYPT_TYPES, *SELF_SIGNED_TYPES]
+    SELF_GENERATED_TYPES= [
+      :self_generated, 'self-generated', 'self_generated', 'selfgenerated',
+      'selfGenerated', 'SelfGenerated', 'SELF_GENERATED'
+    ]
+    ALL_CERT_TYPES = [*LETS_ENCRYPT_TYPES, *SELF_SIGNED_TYPES, *SELF_GENERATED_TYPES]
 
     RC = Dotenv.parse(File.join(Flight.root, 'etc/web-suite.rc'))
 
@@ -112,6 +116,14 @@ module FlightCert
       File.join(letsencrypt_live_dir, domain, 'privkey.pem')
     end
 
+    def selfgenerated_fullchain
+      File.join(selfgenerated_live_dir, domain, 'fullchain.pem')
+    end
+
+    def selfgenerated_privkey
+      File.join(selfgenerated_live_dir, domain, 'privkey.pem')
+    end
+
     def letsencrypt?
       resolved_cert_type == :lets_encrypt
     end
@@ -120,12 +132,18 @@ module FlightCert
       resolved_cert_type == :self_signed
     end
 
+    def selfgenerated?
+      resolved_cert_type == :self_generated
+    end
+
     def resolved_cert_type
       case cert_type.to_s
       when *LETS_ENCRYPT_TYPES
         :lets_encrypt
       when *SELF_SIGNED_TYPES
         :self_signed
+      when *SELF_GENERATED_TYPES
+        :self_generated
       else
         $stderr.puts <<~WARN.chomp
           An unexpected error has occurred! Unrecognized certificate type: #{cert_type}
