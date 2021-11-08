@@ -116,14 +116,6 @@ module FlightCert
       File.join(letsencrypt_live_dir, domain, 'privkey.pem')
     end
 
-    def selfgenerated_fullchain
-      File.join(selfgenerated_live_dir, domain, 'fullchain.pem')
-    end
-
-    def selfgenerated_privkey
-      File.join(selfgenerated_live_dir, domain, 'privkey.pem')
-    end
-
     def letsencrypt?
       resolved_cert_type == :lets_encrypt
     end
