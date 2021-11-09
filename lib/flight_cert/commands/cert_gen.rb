@@ -32,6 +32,7 @@ module FlightCert
   module Commands
     class CertGen < Command
       def run
+        check_if_self_generated
         process_options
         ensure_domain_is_set
         ensure_letsencrypt_has_an_email
@@ -189,6 +190,22 @@ module FlightCert
         FileUtils.mkdir_p File.dirname(ssl_fullchain)
         FileUtils.ln_sf privkey, ssl_privkey
         FileUtils.ln_sf fullchain, ssl_fullchain
+      end
+
+      def check_if_self_generated
+        # If the certificates currently in use are self-generated, we don't
+        # want them to be automatically update when `cert-gen` is run without
+        # any arguments (e.g. by the `cron-renewal` functionality).
+        self_gen_types = FlightCert::Configuration::SELF_GENERATED_TYPES
+        other_types = FlightCert::Configuration::ALL_CERT_TYPES - self_gen_types
+        cert_type = Flight.config.cert_type
+
+        if self_gen_types.include?(cert_type) && !other_types.include?(options.cert_type)
+          raise GeneralError, <<~ERROR.chomp
+            Certificate generation aborted; self-generated certificates currently in use.
+            Please be aware that the SSL certificates being used must match the domain.
+          ERROR
+        end
       end
     end
   end
