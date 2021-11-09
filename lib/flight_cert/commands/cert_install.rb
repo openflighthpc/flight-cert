@@ -29,6 +29,8 @@ module FlightCert
   module Commands
     class CertInstall < Command
       def run
+        check_files_exist(key: options.key, fullchain: options.fullchain)
+
         key = options.key
         fullchain = options.fullchain
         set_cert_type
@@ -68,6 +70,16 @@ module FlightCert
         FileUtils.mkdir_p File.dirname(ssl_fullchain)
         FileUtils.ln_sf key, ssl_privkey
         FileUtils.ln_sf fullchain, ssl_fullchain
+      end
+
+      def check_files_exist(**files)
+        files.each do |k,v|
+          if !File.exist?(v)
+            raise GeneralError, <<~ERROR
+              #{k.capitalize} at #{v} does not exist!
+            ERROR
+          end
+        end
       end
     end
   end
