@@ -29,11 +29,11 @@ module FlightCert
   module Commands
     class CertInstall < Command
       def run
-        check_files_exist(key: options.key, fullchain: options.fullchain)
-
         key = options.key
         fullchain = options.fullchain
-        set_cert_type
+        check_files_exist(key: key, fullchain: fullchain)
+        set_config
+        Flight.config.save_local_configuration
         
         # Create symlinks for certificates
         link_certificates(key, fullchain)
@@ -58,8 +58,8 @@ module FlightCert
 
       private
 
-      def set_cert_type
-        Flight.config.cert_type = :self_generated
+      def set_config
+        Flight.config.cert_type = 'self_generated'
       end
 
       def link_certificates(key, fullchain)
