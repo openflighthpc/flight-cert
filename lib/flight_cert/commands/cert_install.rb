@@ -29,8 +29,8 @@ module FlightCert
   module Commands
     class CertInstall < Command
       def run
-        key = options.key
-        fullchain = options.fullchain
+        key = @args[0]
+        fullchain = @args[1]
         check_files_exist(key: key, fullchain: fullchain)
         set_config
         Flight.config.save_local_configuration
