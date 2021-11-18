@@ -170,6 +170,7 @@ module FlightCert
         FileUtils.mkdir_p Flight.config.selfsigned_dir
         File.write        Flight.config.selfsigned_fullchain, builder.to_fullchain
         File.write        Flight.config.selfsigned_privkey,   builder.key.to_s
+        File.chmod 0600,  Flight.config.selfsigned_privkey
         puts 'Certificate generated.'
       end
 
