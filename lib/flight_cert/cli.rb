@@ -75,11 +75,24 @@ module FlightCert
         generated, by running the following command:
 
         '#{Flight.config.program_name} cert-gen --cert-type self-signed --domain DOMAIN'
+
+        The option to use self-generated certificates is also available. You can specify
+        the path to your own certificates by running the following command:
+
+        '#{Flight.config.program_name} cert-install <PATH-TO-KEY> <PATH-TO-FULLCHAIN>'
       DESC
       c.slop.string '--cert-type', 'Select the certificate type: lets-encrypt|self-signed'
       c.slop.string '--domain', 'The domain associated with the certificate'
       c.slop.string '--email', "The email address associated with the Let's Encrypt certificate. Use empty string to unset"
       c.slop.bool '--config-only', 'Only update the internal configuration, skips certificate generation'
+    end
+
+    create_command 'cert-install', 'KEY_PATH FULL_CHAIN_PATH' do |c|
+      c.summary = 'Use a self-generated SSL certificate'
+      c.description = <<~DESC
+        Use an SSL certificate that has been generated independently of
+        #{Flight.config.program_name}.
+      DESC
     end
 
     create_command 'cron-renewal' do |c|

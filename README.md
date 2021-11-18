@@ -84,6 +84,13 @@ bin/cert cert-gen --domain <DOMAIN> --cert-type lets_encrypt --email <EMAIL>
 bin/cert enable-https
 ```
 
+Use self generated certificates:
+
+```
+bin/cert cert-install <PATH-TO-PRIVKEY> <PATH-TO-FULLCHAIN>
+bin/cert enable-https
+```
+
 Disable HTTPS usage:
 
 ```
