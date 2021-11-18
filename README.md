@@ -87,7 +87,7 @@ bin/cert enable-https
 Use self generated certificates:
 
 ```
-bin/cert cert-install --key <PATH-TO-PRIVKEY> --fullchain <PATH-TO-FULLCHAIN>
+bin/cert cert-install <PATH-TO-PRIVKEY> <PATH-TO-FULLCHAIN>
 bin/cert enable-https
 ```
 
