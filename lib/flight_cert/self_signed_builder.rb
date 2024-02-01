@@ -54,7 +54,7 @@ module FlightCert
         cert.add_extension ef.create_extension("basicConstraints","CA:TRUE")
         cert.add_extension ef.create_extension("subjectKeyIdentifier", "hash")
         cert.add_extension ef.create_extension("authorityKeyIdentifier", "keyid:always,issuer:always")
-        cert.add_extension ef.create_extension("keyUsage","keyCertSign, cRLSign" )
+        cert.add_extension ef.create_extension("keyUsage","digitalSignature, keyCertSign, cRLSign" )
 
         cert.sign key, OpenSSL::Digest::SHA256.new
       end
