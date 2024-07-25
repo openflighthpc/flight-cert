@@ -25,5 +25,5 @@
 # https://github.com/openflighthpc/flight-cert
 #==============================================================================
 module FlightCert
-  VERSION = '0.6.1'
+  VERSION = '0.6.2'
 end
